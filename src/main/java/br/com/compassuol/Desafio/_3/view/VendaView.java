@@ -11,10 +11,7 @@ import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
 import br.com.compassuol.Desafio._3.repository.VendaRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class VendaView {
 
@@ -68,10 +65,10 @@ public class VendaView {
                     cadastrarVenda();
                     break;
 
-//                case 2:
-//                    buscarVendaPorId();
-//                    break;
-//
+                case 2:
+                    buscarVendaPorId();
+                    break;
+
 //                case 3:
 //                    filtrarVendaPorSemana();;
 //                    break;
@@ -193,6 +190,25 @@ public class VendaView {
             } else {
                 System.out.println("Produto não encontrado. Tente novamente.");
             }
+        }
+    }
+
+    // Método para buscar venda por id
+    private void buscarVendaPorId() {
+        try{
+            System.out.println("Entre com o id da venda:");
+            var idVenda = sc.nextLong();
+
+            Optional<Venda> venda = vendaRepository.findById(idVenda);
+            if(venda.isPresent()) {
+
+                List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(idVenda);
+                for(ItemPedido item : items){
+                    System.out.println(item);
+                }
+            }
+        }catch (InputMismatchException e ){
+            throw new InputMismatchException("Valor informado inválido. Certifique-se de inserir um número válido.");
         }
     }
 
