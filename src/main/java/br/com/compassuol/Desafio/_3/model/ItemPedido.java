@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Entity
+@NoArgsConstructor
 public class ItemPedido implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -35,9 +37,9 @@ public class ItemPedido implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Date dataItemPedido;
 
-    public ItemPedido() {}
-    public ItemPedido(Venda venda, Produto produto, Double precoDoItem, Integer quantidadeDoItem, Date dataItemPedido) {
+    public ItemPedido(Long idItemPedido,Venda venda, Produto produto, Double precoDoItem, Integer quantidadeDoItem, Date dataItemPedido) {
         super();
+        this.idItemPedido = idItemPedido;
         id.setVenda(venda);
         id.setProduto(produto);
         this.precoDoItem = precoDoItem;

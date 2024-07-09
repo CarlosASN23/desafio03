@@ -3,6 +3,7 @@ package br.com.compassuol.Desafio._3.model;
 import br.com.compassuol.Desafio._3.model.enums.StatusVenda;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,8 @@ import org.hibernate.annotations.CurrentTimestamp;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -34,6 +37,10 @@ public class Venda implements Serializable {
 
     @Column(name = "Valor_venda",nullable = false)
     private Double valorVenda;
+
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "id.venda", cascade = CascadeType.ALL)
+    @Valid
+    private Set<ItemPedido> itens = new HashSet<>();
 
     public StatusVenda getStatusVenda() {
         return StatusVenda.toEnum(statusVenda);
