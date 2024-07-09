@@ -2,6 +2,7 @@ package br.com.compassuol.Desafio._3.model;
 
 import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +18,7 @@ public class Produto implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
     @Column(name ="nome",nullable = false, unique = true)
     private String nome;
