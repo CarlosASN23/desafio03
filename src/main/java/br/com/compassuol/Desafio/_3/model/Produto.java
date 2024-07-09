@@ -8,8 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,7 +22,7 @@ public class Produto implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private Long id;
+    private Long idProduto;
     @Column(name ="nome",nullable = false, unique = true)
     private String nome;
     @Column(name ="preco",nullable = false)
@@ -31,13 +31,14 @@ public class Produto implements Serializable {
     private Integer estoque = 0;
     @Column(name="ativo",nullable = false)
     private Boolean ativo = true;
+
     @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER,mappedBy="id.produto", cascade = CascadeType.ALL)
-    private Set<ItemPedido> itens = new HashSet<>();
+    @OneToMany(fetch = FetchType.EAGER,mappedBy= "produto", cascade = CascadeType.ALL)
+    private List<ItemPedido> itens = new ArrayList<>();
 
     @Override
     public String toString() {
-        return "Produto{"+"ID= " + id +
+        return "Produto{"+"ID= " + idProduto +
                 ", Nome= " + nome  +
                 ", Preço= R$" + preco +
                 ", Ativo= " + ativo +

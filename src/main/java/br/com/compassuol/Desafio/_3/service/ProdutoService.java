@@ -29,7 +29,7 @@ public class ProdutoService {
 
         if (produto.isPresent()) {
             Produto p = produto.get();
-            return new DadosProdutoDto(p.getId(),p.getNome(), p.getPreco(),p.getAtivo(),p.getEstoque());
+            return new DadosProdutoDto(p.getIdProduto(),p.getNome(), p.getPreco(),p.getAtivo(),p.getEstoque());
         } throw new ObjectNotFoundException("Produto não encontrado para o ID: " + id);
 
     }

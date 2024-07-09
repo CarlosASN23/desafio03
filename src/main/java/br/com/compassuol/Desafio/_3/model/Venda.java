@@ -2,6 +2,7 @@ package br.com.compassuol.Desafio._3.model;
 
 import br.com.compassuol.Desafio._3.model.enums.StatusVenda;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import lombok.EqualsAndHashCode;
@@ -10,9 +11,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CurrentTimestamp;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -25,7 +24,7 @@ public class Venda implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private Long id;
+    private Long idVenda;
 
     @CurrentTimestamp
     @Column(name = "Data_Venda",nullable = false)
@@ -38,9 +37,10 @@ public class Venda implements Serializable {
     @Column(name = "Valor_venda",nullable = false)
     private Double valorVenda;
 
-    @OneToMany(fetch = FetchType.EAGER,mappedBy = "id.venda", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "venda", cascade = CascadeType.ALL)
     @Valid
-    private Set<ItemPedido> itens = new HashSet<>();
+    private List<ItemPedido> itens = new ArrayList<>();
 
     public StatusVenda getStatusVenda() {
         return StatusVenda.toEnum(statusVenda);
@@ -52,7 +52,7 @@ public class Venda implements Serializable {
     @Override
     public String toString() {
         return "Venda{" +
-                "Id = " + id +
+                "Id = " + idVenda +
                 ", Data Criacao = " + dataCriacao +
                 ", Status da Venda = " + statusVenda +
                 ", Valor Venda = R$" + valorVenda;

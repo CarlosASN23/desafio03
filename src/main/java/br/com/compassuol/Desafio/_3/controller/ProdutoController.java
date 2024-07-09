@@ -45,7 +45,7 @@ public class ProdutoController {
     public ResponseEntity cadastrarProduto(@RequestBody @Valid Produto dados, UriComponentsBuilder uriBuilder){
 
         var prod = service.cadastrarProduto(dados);
-        var uri = uriBuilder.path("/produto/{id}").buildAndExpand(prod.getId()).toUri();
+        var uri = uriBuilder.path("/produto/{id}").buildAndExpand(prod.getIdProduto()).toUri();
         return ResponseEntity.created(uri).body(prod);
     }
 

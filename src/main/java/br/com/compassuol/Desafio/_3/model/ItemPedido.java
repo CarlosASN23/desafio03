@@ -18,16 +18,24 @@ import java.util.Map;
 public class ItemPedido implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long idItemPedido;
 
-    @Getter
     @Setter
-    @JsonIgnore
-    @EmbeddedId
-    private ItemPedidoPK id = new ItemPedidoPK();
+    @Getter
+    @ManyToOne
+    @JoinColumn(name="idVenda")
+    private Venda venda;
+
+    @Setter
+    @Getter
+    @ManyToOne
+    @JoinColumn(name="idProduto")
+    private Produto produto;
+
     @Column(name = "Preco_Item",nullable = false)
     private Double precoDoItem;
     @Column(name = "Quantidade_Item",nullable = false)
@@ -40,32 +48,27 @@ public class ItemPedido implements Serializable {
     public ItemPedido(Long idItemPedido,Venda venda, Produto produto, Double precoDoItem, Integer quantidadeDoItem, Date dataItemPedido) {
         super();
         this.idItemPedido = idItemPedido;
-        id.setVenda(venda);
-        id.setProduto(produto);
+        venda.getIdVenda();
+        produto.getIdProduto();
         this.precoDoItem = precoDoItem;
         this.quantidadeDoItem = quantidadeDoItem;
         this.dataItemPedido = dataItemPedido;
     }
 
-    @JsonIgnore
-    public Venda getVenda() {
-        return id.getVenda();
-    }
-
-    public Produto getProduto() {
-        return id.getProduto();
-    }
-
     @Override
     public String toString() {
-        return "ItemPedido{" + id +
-                " | Preco total Compra = R$" + precoDoItem +
+        return "ItemPedido{ id: " + idItemPedido + "{ Venda id: " +
+                venda.getIdVenda() + ",Data " + venda.getDataCriacao() +
+                ", Status Venda " + venda.getStatusVenda()+
+                ", Nome do produto = " + produto.getNome() +
+                ", Preço = R$" + produto.getPreco()+
+                ", Preco total Compra = R$" + precoDoItem +
                 ", Quantidade Total do item = " + quantidadeDoItem;
     }
 
     public void atualizarEstoque (List< ItemPedido > itensPedido, Map< Long, Produto > estoque){
         for (ItemPedido item : itensPedido) {
-            long idProduto = item.getProduto().getId();
+            long idProduto = item.getProduto().getIdProduto();
             int quantidadeVendida = item.getProduto().getEstoque();
 
             if (estoque.containsKey(idProduto)) {
