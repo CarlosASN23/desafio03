@@ -19,7 +19,7 @@ public class ProdutoView {
     private DadosProdutoDto dados;
 
 
-    // Domain
+    //Model
     private List<Produto> produtos = new ArrayList<>();
     private Produto produto;
 

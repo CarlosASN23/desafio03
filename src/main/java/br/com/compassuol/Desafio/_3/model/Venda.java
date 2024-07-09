@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CurrentTimestamp;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -29,7 +30,7 @@ public class Venda implements Serializable {
     @CurrentTimestamp
     @Column(name = "Data_Venda",nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private Date dataCriacao;
+    private LocalDate dataCriacao;
 
     @Column(name = "Status_venda",nullable = false)
     private Integer statusVenda;
