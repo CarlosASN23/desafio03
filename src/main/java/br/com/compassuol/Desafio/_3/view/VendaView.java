@@ -88,9 +88,9 @@ public class VendaView {
                     editarVenda();
                     break;
 
-//                case 6:
-//                    cancelarVenda();
-//                    break;
+                case 6:
+                    cancelarVenda();
+                    break;
 
                 case 0:
                     System.out.println("Encerrando aplicação....");
@@ -353,32 +353,52 @@ public class VendaView {
 
                     itemPedido.atualizarInformacoes(dadosItem);
                     itemPedidoRepository.save(itemPedido);
-                    System.out.println(itemPedido);
+                    System.out.println("Venda atualizada com sucesso");
 
-                }else{
-                    System.out.println("Digite a nova  quantidade de compra do produto ou deixe em branco caso não queira altera-lo: ");
-                    var quantidadeInput = sc.nextLine();
+                } else if (v.getStatusVenda() == StatusVenda.EFETIVADA || v.getStatusVenda() == StatusVenda.PENDENTE) {
+
+                    System.out.println("Digite a nova quantidade de compra do produto ou deixe em branco caso não queira alterá-lo: ");
+                    var quantidadeInput = sc.nextLine(); // Consumir a quebra de linha pendente
+                    quantidadeInput = sc.nextLine(); // Ler a entrada do usuário corretamente
+
                     var quantidadeVenda = quantidadeInput.trim().isEmpty() || Integer.parseInt(quantidadeInput) < 0 ? itemPedido.getQuantidadeDoItem() : Integer.parseInt(quantidadeInput);
 
-                    var valorTotal = itemPedido.getPrecoDoItem() * quantidadeVenda;
+                    if(quantidadeVenda != 0 && quantidadeVenda > 0 && quantidadeVenda <= p.getEstoque()){
 
-                    DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),valorTotal);
-                    DadosItemPedidoDto dadosItemPedidoDto = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
-                                                                                   itemPedido.getProduto(),itemPedido.getPrecoDoItem(),
-                                                                                   quantidadeVenda,itemPedido.getDataItemPedido());
+                        // Voltar o estoque para não haver duas saidas do estoque do produto com a venda anterior
+                        var novoEstoque = produtos.estoque() + itemPedido.getQuantidadeDoItem();
+                        produtos = new DadosProdutoDto(p.getIdProduto(),p.getNome(),p.getPreco(),p.getAtivo(),novoEstoque);
+                        p.atualizarInformacoes(produtos);
+                        produtoRepository.save(p);
 
-                    // Bloco para atualizar o estoque do produto após atualização da venda
-                    var novoEstoque = produtos.estoque() - itemPedido.getQuantidadeDoItem();
-                    produtos = new DadosProdutoDto(p.getIdProduto(),p.getNome(),p.getPreco(),p.getAtivo(),novoEstoque);
-                    p.atualizarInformacoes(produtos);
-                    produtoRepository.save(p);
+                        var valorTotal = itemPedido.getProduto().getPreco() * quantidadeVenda;
 
-                    v.atualizarInformacoes(dados);
-                    itemPedido.atualizarInformacoes(dadosItemPedidoDto);
+                        DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), valorTotal);
 
-                    vendaRepository.save(v);
-                    itemPedidoRepository.save(itemPedido);
-                    System.out.println(itemPedido);
+                        DadosItemPedidoDto dadosItemPedidoDto = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
+                                itemPedido.getProduto(), valorTotal,
+                                quantidadeVenda, itemPedido.getDataItemPedido());
+
+                        // Atualizar o estoque do produto após atualização da venda
+                        var atualizacao = produtos.estoque() - quantidadeVenda;
+                        produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), atualizacao);
+                        p.atualizarInformacoes(produtos);
+                        produtoRepository.save(p);
+
+                        // Atualizar informações da venda e do item de pedido
+                        v.atualizarInformacoes(dados);
+                        itemPedido.atualizarInformacoes(dadosItemPedidoDto);
+
+                        vendaRepository.save(v);
+                        itemPedidoRepository.save(itemPedido);
+                        System.out.println("Venda atualizada com sucesso");
+
+                    }else{
+                        System.out.println("Não foi possivel fazer a atualização da venda");
+                    }
+            }
+            else {
+                    System.out.println("Não foi possivel alterar a venda");
                 }
             }
 
@@ -387,5 +407,56 @@ public class VendaView {
         }
     }
 
+    // Método para cancelar a venda
+    private void cancelarVenda() {
+
+        System.out.println("Entre com o id da venda:");
+        var idVenda = sc.nextLong();
+
+        Optional<Venda> venda = vendaRepository.findById(idVenda);
+
+        if (venda.isPresent()) {
+            Venda v = venda.get();
+            var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+
+            // Instanciando o itemPedido
+            List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(idVenda);
+            ItemPedido itemPedido = items.get(0);
+
+            var dadosItemPedido = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
+                    itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
+                    itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
+            System.out.println(dadosItemPedido);
+
+            // Instanciando o produto
+            Optional<Produto> produto = produtoRepository.findById(itemPedido.getProduto().getIdProduto());
+            Produto p = produto.get();
+            var produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), p.getEstoque());
+
+            v.setValorVenda(0.0);
+            v.setStatusVenda(StatusVenda.CANCELADA);
+            DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+
+            v.atualizarInformacoes(dados);
+            vendaRepository.save(v);
+
+            // Bloco para atualizar o estoque do produto após cancelamento da venda
+            var novoEstoque = produtos.estoque() + itemPedido.getQuantidadeDoItem();
+            produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), novoEstoque);
+            p.atualizarInformacoes(produtos);
+            produtoRepository.save(p);
+
+            // Zerar a quantidade comprada do produto e o valor
+            itemPedido.setQuantidadeDoItem(0);
+            itemPedido.setPrecoDoItem(0.0);
+            DadosItemPedidoDto dadosItem = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
+                    itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
+                    itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
+
+            itemPedido.atualizarInformacoes(dadosItem);
+            itemPedidoRepository.save(itemPedido);
+            System.out.println("Venda cancelada com sucesso");
+        }
+    }
 
 }
