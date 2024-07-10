@@ -44,7 +44,7 @@ public class VendaView {
         this.itemPedidoRepository = itemPedidoRepository;
     }
 
-    public void exibirMenu() {
+    public  void exibirMenu() {
         var opcao = -1;
 
         while (opcao != 0) {
@@ -93,7 +93,6 @@ public class VendaView {
                     break;
 
                 case 0:
-                    System.out.println("Encerrando aplicação....");
                     break;
 
                 default:
