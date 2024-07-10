@@ -14,14 +14,15 @@ import br.com.compassuol.Desafio._3.repository.VendaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.Calendar.DAY_OF_WEEK;
 
 @Service
 public class VendaService {
@@ -103,6 +104,16 @@ public class VendaService {
         }
 
         return itemPedidoRepository.findByDataItemPedidoBetween(inicio,fim);
+    }
+
+    public List<ItemPedido> gerarRelatórioSemanal(){
+        // 1. Obter as vendas da semana atual (ou do período desejado)
+        LocalDateTime dataInicioSemana = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // Início da semana
+        LocalDateTime dataFimSemana = LocalDateTime.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).with(LocalTime.MAX); // Fim da semana
+
+        List<ItemPedido> vendaSemana = itemPedidoRepository.findByDataItemPedidoBetween(dataInicioSemana,dataFimSemana);
+
+        return vendaSemana;
     }
 
 }

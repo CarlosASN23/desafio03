@@ -53,6 +53,13 @@ public class VendaController {
         return ResponseEntity.ok(items);
     }
 
+    // Método para gerar relatório semanal
+    @GetMapping("/relatorio/semanal")
+    public ResponseEntity<List<ItemPedido>>gerarRelatórioSemanal(){
+        List<ItemPedido> items = vendaService.gerarRelatórioSemanal();
+        return ResponseEntity.ok(items);
+    }
+
 
 
 

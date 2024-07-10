@@ -15,4 +15,5 @@ public interface ItemPedidoRepository extends JpaRepository<ItemPedido,Long> {
     List<ItemPedido> exibirItensPorVendaId(long idVenda);
 
     List<ItemPedido> findByDataItemPedidoBetween(LocalDateTime semanaInicial, LocalDateTime semanaFinal);
+
 }
