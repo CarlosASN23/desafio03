@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoField;
@@ -114,6 +115,21 @@ public class VendaService {
         List<ItemPedido> vendaSemana = itemPedidoRepository.findByDataItemPedidoBetween(dataInicioSemana,dataFimSemana);
 
         return vendaSemana;
+    }
+
+    public List<ItemPedido>gerarRelatorioMensal(Integer mes, Integer ano){
+
+        // Primeiro, crie as datas de início e fim do mês desejado
+        LocalDate dataInicio = LocalDate.of(ano,mes,1);
+        LocalDate dataFim = dataInicio.withDayOfMonth(dataInicio.lengthOfMonth());
+
+        // Consulte as vendas dentro do intervalo de datas
+        LocalDateTime inicioMes = dataInicio.atStartOfDay();
+        LocalDateTime fimMes = dataFim.atTime(LocalTime.MAX);
+
+        List<ItemPedido> itemPedidos = itemPedidoRepository.findByDataItemPedidoBetween(inicioMes,fimMes);
+
+        return itemPedidos;
     }
 
 }

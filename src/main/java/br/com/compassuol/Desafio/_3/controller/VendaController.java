@@ -5,6 +5,7 @@ import br.com.compassuol.Desafio._3.model.ItemPedido;
 import br.com.compassuol.Desafio._3.model.Produto;
 import br.com.compassuol.Desafio._3.model.Venda;
 import br.com.compassuol.Desafio._3.service.VendaService;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,14 @@ public class VendaController {
     @GetMapping("/relatorio/semanal")
     public ResponseEntity<List<ItemPedido>>gerarRelatórioSemanal(){
         List<ItemPedido> items = vendaService.gerarRelatórioSemanal();
+        return ResponseEntity.ok(items);
+    }
+
+    // Método para gerar relatório mensal
+    @GetMapping("/relatorio/mensal")
+    public ResponseEntity<List<ItemPedido>> gerarRelatorioMensal(@RequestParam Integer mes, @RequestParam Integer ano){
+
+        List<ItemPedido> items = vendaService.gerarRelatorioMensal(mes, ano);
         return ResponseEntity.ok(items);
     }
 
