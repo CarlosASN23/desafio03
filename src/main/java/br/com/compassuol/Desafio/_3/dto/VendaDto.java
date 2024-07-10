@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.annotations.CurrentTimestamp;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
@@ -13,7 +15,7 @@ public record VendaDto(
                         @NotNull
                         @CurrentTimestamp
                         @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ssX")
-                        ZonedDateTime dataVenda,
+                        LocalDateTime dataVenda,
                         @NotNull
                         @Positive
                         Integer statusVenda,

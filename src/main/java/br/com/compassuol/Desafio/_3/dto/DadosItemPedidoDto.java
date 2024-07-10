@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.annotations.CurrentTimestamp;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 public record DadosItemPedidoDto(
@@ -24,6 +26,6 @@ public record DadosItemPedidoDto(
                                 @Positive
                                 Integer quantidadeItem,
                                 @CurrentTimestamp
-                                @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ssX")
-                                ZonedDateTime dataItemPedido) {
+                                @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+                                LocalDateTime dataItemPedido) {
 }

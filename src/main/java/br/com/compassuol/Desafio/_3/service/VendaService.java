@@ -1,7 +1,108 @@
 package br.com.compassuol.Desafio._3.service;
 
+import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
+import br.com.compassuol.Desafio._3.exception.InvalidDateException;
+import br.com.compassuol.Desafio._3.exception.NoItemInSalesException;
+import br.com.compassuol.Desafio._3.exception.ObjectNotFoundException;
+import br.com.compassuol.Desafio._3.model.ItemPedido;
+import br.com.compassuol.Desafio._3.model.Produto;
+import br.com.compassuol.Desafio._3.model.Venda;
+import br.com.compassuol.Desafio._3.model.enums.StatusVenda;
+import br.com.compassuol.Desafio._3.repository.ItemPedidoRepository;
+import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
+import br.com.compassuol.Desafio._3.repository.VendaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class VendaService {
+
+    @Autowired
+    private VendaRepository vendaRepository;
+
+    @Autowired
+    private ItemPedidoRepository itemPedidoRepository;
+
+    @Autowired
+    private ProdutoRepository produtoRepository;
+
+    public List<ItemPedido> buscarVendas(){
+        try{
+            return itemPedidoRepository.findAll();
+        }catch (ObjectNotFoundException e){
+            throw new ObjectNotFoundException("Não foi possivel encontrar as vendas");
+        }
+    }
+
+    public List<ItemPedido> buscarVendaPorId(Long id){
+
+        Optional<Venda> venda = vendaRepository.findById(id);
+
+        if(venda.isPresent()){
+            List<ItemPedido> itens = itemPedidoRepository.exibirItensPorVendaId(id);
+            return itens;
+        }throw  new ObjectNotFoundException("Venda não encontradas para o id: " + id);
+
+    }
+
+    public Venda atualizarVenda(Long id){
+        return null;
+    }
+
+
+    public Venda realizarVenda(List<ItemPedido> itens, Long idProduto){
+
+        if(itens.isEmpty()){
+            throw new NoItemInSalesException("A venda deve conter pelo menos 1 produto");
+        }
+
+        Optional<Produto> produto = produtoRepository.findById(idProduto);
+        if(produto.isPresent()){
+
+            Produto p = produto.get();
+            var produtos = new DadosProdutoDto(p.getIdProduto(),p.getNome(),p.getPreco(),p.getAtivo(),p.getEstoque());
+
+            Venda venda = new Venda();
+            venda.setDataCriacao(LocalDateTime.now());
+            venda.setStatusVenda(StatusVenda.EFETIVADA);
+            ItemPedido item = new ItemPedido();
+
+            venda.setValorVenda(p.getPreco() * item.getQuantidadeDoItem());
+            vendaRepository.save(venda);
+
+            item.setProduto(p);
+            itemPedidoRepository.save(item);
+
+            return venda;
+
+
+        }else{
+            throw new ObjectNotFoundException("Não foi possivel associar o id do produto a venda");
+        }
+
+    }
+
+    public List<ItemPedido> filtroVendaPorData(LocalDateTime inicio, LocalDateTime fim){
+        
+        if(inicio.isAfter(LocalDateTime.now())){
+
+            throw new InvalidDateException("A data inicial deve estar no passado");
+
+        }else if(inicio.isAfter(fim)){
+
+            throw new InvalidDateException("A data inicial deve ser antes da data final");
+        }
+
+        return itemPedidoRepository.findByDataItemPedidoBetween(inicio,fim);
+    }
+
 }

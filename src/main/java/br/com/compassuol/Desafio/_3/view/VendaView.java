@@ -14,9 +14,7 @@ import br.com.compassuol.Desafio._3.repository.VendaRepository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -133,7 +131,7 @@ public class VendaView {
 
                     Venda venda = new Venda();
                     venda.setStatusVenda(StatusVenda.EFETIVADA);
-                    venda.setDataCriacao(ZonedDateTime.now());
+                    venda.setDataCriacao(LocalDateTime.now());
 
                     System.out.println("Digite a quantidade do produto a ser vendida:");
                     item.setQuantidadeDoItem(sc.nextInt());
@@ -150,7 +148,7 @@ public class VendaView {
 
                         var valorTotal = item.getPrecoDoItem() * item.getQuantidadeDoItem();
 
-                         item.setDataItemPedido(ZonedDateTime.now());
+                         item.setDataItemPedido(LocalDateTime.now());
 
                         venda.setValorVenda(valorTotal);
                         vendaRepository.save(venda);
@@ -239,8 +237,7 @@ public class VendaView {
     }
 
     // Método para converter uma String no formato de data correto
-    private ZonedDateTime conversaoData(String dataUsuario) {
-
+    public LocalDateTime conversaoData(String dataUsuario) {
         String dataStr = dataUsuario;
 
         // Converte a string para um objeto Date
@@ -253,11 +250,8 @@ public class VendaView {
             return null;
         }
 
-        // Agora, formate a data no formato desejado (2024-07-11T00:23:28.213917Z)
-        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX");
-        String dataFormatada = outputFormat.format(data);
-
-        return ZonedDateTime.parse(dataFormatada);
+        // Converte o Date para LocalDate
+        return data.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
     // Método para filtrar por mês

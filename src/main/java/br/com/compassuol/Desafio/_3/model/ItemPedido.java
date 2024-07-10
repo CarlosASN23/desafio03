@@ -2,7 +2,6 @@ package br.com.compassuol.Desafio._3.model;
 
 import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -12,8 +11,7 @@ import org.hibernate.annotations.CurrentTimestamp;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -49,8 +47,8 @@ public class ItemPedido implements Serializable {
 
     @CurrentTimestamp
     @Column(name = "Data_criacao_Item",nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ssX")
-    private ZonedDateTime dataItemPedido;
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    private LocalDateTime dataItemPedido;
 
     public ItemPedido(Venda venda,Produto produto,Double precoDoItem, Integer quantidadeDoItem) {
         super();
