@@ -13,6 +13,7 @@ import br.com.compassuol.Desafio._3.repository.VendaRepository;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -77,9 +78,10 @@ public class VendaView {
                     filtrarVendaPorSemana();;
                     break;
 
-//                case 4:
-//                    filtrarVendaPorMes();
-//                    break;
+                case 4:
+                    filtrarVendaPorMes();
+                    break;
+
 //                case 5:
 //                    editarVenda();
 //                    break;
@@ -255,6 +257,32 @@ public class VendaView {
         String dataFormatada = outputFormat.format(data);
 
         return ZonedDateTime.parse(dataFormatada);
+    }
+
+    // Método para filtrar por mês
+    private void filtrarVendaPorMes() {
+
+        System.out.println("Digite o mês (no formato yyyy-MM):");
+        String mesStr = sc.nextLine();
+
+        var inicioMes = conversaoData(mesStr + "-01"); // Primeiro dia do mês
+        var fimMes = conversaoData(mesStr + "-31"); // Último dia do mês
+
+        List<ItemPedido> vendasMes = itemPedidoRepository.findByDataItemPedidoBetween(inicioMes, fimMes);
+
+        if(!vendasMes.isEmpty()){
+            // Exibe as vendas do mês
+            for (ItemPedido item : vendasMes) {
+                System.out.println(item);
+            }
+        }else{
+            YearMonth yearMonth = YearMonth.parse(mesStr, DateTimeFormatter.ofPattern("yyyy-MM"));
+            var mesAnoFormatado = yearMonth.format(DateTimeFormatter.ofPattern("MMMM/yyyy",Locale.ENGLISH));
+            System.out.println("Não houveram vends durante o mês de: " + mesAnoFormatado);
         }
+
+    }
+
+
 
 }
