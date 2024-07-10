@@ -11,6 +11,7 @@ import org.hibernate.annotations.CurrentTimestamp;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +48,8 @@ public class ItemPedido implements Serializable {
 
     @CurrentTimestamp
     @Column(name = "Data_criacao_Item",nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDate dataItemPedido;
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ssX")
+    private ZonedDateTime dataItemPedido;
 
     public ItemPedido(Venda venda,Produto produto,Double precoDoItem, Integer quantidadeDoItem) {
         super();

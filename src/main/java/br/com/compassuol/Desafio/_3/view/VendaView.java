@@ -10,7 +10,11 @@ import br.com.compassuol.Desafio._3.repository.ItemPedidoRepository;
 import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
 import br.com.compassuol.Desafio._3.repository.VendaRepository;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class VendaView {
@@ -69,10 +73,10 @@ public class VendaView {
                     buscarVendaPorId();
                     break;
 
-//                case 3:
-//                    filtrarVendaPorSemana();;
-//                    break;
-//
+                case 3:
+                    filtrarVendaPorSemana();;
+                    break;
+
 //                case 4:
 //                    filtrarVendaPorMes();
 //                    break;
@@ -126,7 +130,7 @@ public class VendaView {
 
                     Venda venda = new Venda();
                     venda.setStatusVenda(StatusVenda.EFETIVADA);
-                    venda.setDataCriacao(LocalDate.now());
+                    venda.setDataCriacao(ZonedDateTime.now());
 
                     System.out.println("Digite a quantidade do produto a ser vendida:");
                     item.setQuantidadeDoItem(sc.nextInt());
@@ -143,7 +147,7 @@ public class VendaView {
 
                         var valorTotal = item.getPrecoDoItem() * item.getQuantidadeDoItem();
 
-                         item.setDataItemPedido(LocalDate.now());
+                         item.setDataItemPedido(ZonedDateTime.now());
 
                         venda.setValorVenda(valorTotal);
                         vendaRepository.save(venda);
@@ -212,5 +216,45 @@ public class VendaView {
         }
     }
 
+    // Método para Filtrar vendas por semana
+    private void filtrarVendaPorSemana() {
+
+        System.out.println("Digite a data da semana inicial (no formato yyyy-MM-dd):");
+        String semanaInicialStr = sc.nextLine();
+        var inicio = conversaoData(semanaInicialStr);
+
+        System.out.println("Digite a data da semana final (no formato yyyy-MM-dd):");
+        String semanaFinalStr = sc.nextLine();
+        var fim = conversaoData(semanaFinalStr);
+
+        List<ItemPedido> vendasSemana = itemPedidoRepository.findByDataItemPedidoBetween(inicio, fim);
+
+        // Exibe as vendas da semana
+        for (ItemPedido item : vendasSemana) {
+            System.out.println(item);
+        }
+    }
+
+    // Método para converter uma String no formato de data correto
+    private ZonedDateTime conversaoData(String dataUsuario) {
+
+        String dataStr = dataUsuario;
+
+        // Converte a string para um objeto Date
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date data;
+        try {
+            data = inputFormat.parse(dataStr);
+        } catch (ParseException e) {
+            System.err.println("Erro ao converter a data. Certifique-se de usar o formato correto.");
+            return null;
+        }
+
+        // Agora, formate a data no formato desejado (2024-07-11T00:23:28.213917Z)
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX");
+        String dataFormatada = outputFormat.format(data);
+
+        return ZonedDateTime.parse(dataFormatada);
+        }
 
 }

@@ -12,6 +12,7 @@ import org.hibernate.annotations.CurrentTimestamp;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Entity
@@ -29,8 +30,8 @@ public class Venda implements Serializable {
 
     @CurrentTimestamp
     @Column(name = "Data_Venda",nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDate dataCriacao;
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ssX")
+    private ZonedDateTime dataCriacao;
 
     @Column(name = "Status_venda",nullable = false)
     private Integer statusVenda;

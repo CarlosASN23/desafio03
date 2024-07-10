@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.annotations.CurrentTimestamp;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 public record DadosVendaDto(
@@ -13,8 +14,8 @@ public record DadosVendaDto(
                             Long id,
                             @NotNull
                             @CurrentTimestamp
-                            @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss")
-                            Date dataVenda,
+                            @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ssX")
+                            ZonedDateTime dataVenda,
                             @Positive
                             Integer statusVenda,
                             @PositiveOrZero
