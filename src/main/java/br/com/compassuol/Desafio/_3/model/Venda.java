@@ -1,5 +1,6 @@
 package br.com.compassuol.Desafio._3.model;
 
+import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
 import br.com.compassuol.Desafio._3.model.enums.StatusVenda;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -58,5 +59,16 @@ public class Venda implements Serializable {
                 ", Data Criacao = " + dataCriacao +
                 ", Status da Venda = " + statusVenda +
                 ", Valor Venda = R$" + valorVenda;
+    }
+
+    public DadosVendaDto atualizarInformacoes(DadosVendaDto dados) {
+
+        if(dados.statusVenda() != null) {
+            this.statusVenda = dados.statusVenda().getCod();
+        }
+        if(dados.valorVenda() != null){
+            this.valorVenda = dados.valorVenda();
+        }
+        return dados;
     }
 }

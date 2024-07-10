@@ -1,5 +1,6 @@
 package br.com.compassuol.Desafio._3.model;
 
+import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -98,4 +99,13 @@ public class ItemPedido implements Serializable {
         return precoTotal;
     }
 
+    public DadosItemPedidoDto atualizarInformacoes(DadosItemPedidoDto dadosItem) {
+        if(dadosItem.precoItem() != null){
+            this.precoDoItem = dadosItem.precoItem();
+        }
+        if(dadosItem.quantidadeItem() != null){
+            this.quantidadeDoItem = dadosItem.quantidadeItem();
+        }
+        return dadosItem;
+    }
 }
