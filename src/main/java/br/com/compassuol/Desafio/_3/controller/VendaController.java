@@ -1,11 +1,7 @@
 package br.com.compassuol.Desafio._3.controller;
 
-import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
 import br.com.compassuol.Desafio._3.model.ItemPedido;
-import br.com.compassuol.Desafio._3.model.Produto;
-import br.com.compassuol.Desafio._3.model.Venda;
 import br.com.compassuol.Desafio._3.service.VendaService;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +63,15 @@ public class VendaController {
 
         List<ItemPedido> items = vendaService.gerarRelatorioMensal(mes, ano);
         return ResponseEntity.ok(items);
+    }
+
+    //Método para criar uma nova venda
+    @PostMapping
+    @Transactional
+    public ResponseEntity<ItemPedido> criarNovaVenda(@RequestParam @Valid Long idProduto, UriComponentsBuilder uriBuilder){
+        ItemPedido itemPedido = vendaService.criarVenda(idProduto);
+        var uri = uriBuilder.path("/venda/{id}").buildAndExpand(itemPedido.getVenda().getIdVenda()).toUri();
+        return ResponseEntity.created(uri).body(itemPedido);
     }
 
 

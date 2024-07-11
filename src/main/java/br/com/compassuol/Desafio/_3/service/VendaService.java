@@ -3,6 +3,7 @@ package br.com.compassuol.Desafio._3.service;
 import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
 import br.com.compassuol.Desafio._3.exception.InvalidDateException;
 import br.com.compassuol.Desafio._3.exception.NoItemInSalesException;
+import br.com.compassuol.Desafio._3.exception.NoProdutcAtiveExcetion;
 import br.com.compassuol.Desafio._3.exception.ObjectNotFoundException;
 import br.com.compassuol.Desafio._3.model.ItemPedido;
 import br.com.compassuol.Desafio._3.model.Produto;
@@ -18,12 +19,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.Calendar.DAY_OF_WEEK;
 
 @Service
 public class VendaService {
@@ -36,6 +34,13 @@ public class VendaService {
 
     @Autowired
     private ProdutoRepository produtoRepository;
+
+    private ProdutoService produtoService;
+
+    @Autowired
+    public VendaService(ProdutoService produtoService){
+        this.produtoService = produtoService;
+    }
 
     public List<ItemPedido> buscarVendas(){
         try{
@@ -56,41 +61,50 @@ public class VendaService {
 
     }
 
-    public Venda atualizarVenda(Long id){
-        return null;
-    }
+    public ItemPedido criarVenda(Long idProduto){
 
-
-    public Venda realizarVenda(List<ItemPedido> itens, Long idProduto){
-
-        if(itens.isEmpty()){
-            throw new NoItemInSalesException("A venda deve conter pelo menos 1 produto");
-        }
-
-        Optional<Produto> produto = produtoRepository.findById(idProduto);
-        if(produto.isPresent()){
+        Optional<Produto>produto = produtoRepository.findById(idProduto);
+        if(produto.isPresent()) {
 
             Produto p = produto.get();
-            var produtos = new DadosProdutoDto(p.getIdProduto(),p.getNome(),p.getPreco(),p.getAtivo(),p.getEstoque());
 
-            Venda venda = new Venda();
-            venda.setDataCriacao(LocalDateTime.now());
-            venda.setStatusVenda(StatusVenda.EFETIVADA);
-            ItemPedido item = new ItemPedido();
+            var produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), p.getEstoque());
 
-            venda.setValorVenda(p.getPreco() * item.getQuantidadeDoItem());
-            vendaRepository.save(venda);
+            if (p.getAtivo() == true && p.getEstoque() > 0) {
 
-            item.setProduto(p);
-            itemPedidoRepository.save(item);
-
-            return venda;
+                Venda venda = new Venda();
+                venda.setStatusVenda(StatusVenda.EFETIVADA);
+                venda.setDataCriacao(LocalDateTime.now());
 
 
-        }else{
-            throw new ObjectNotFoundException("Não foi possivel associar o id do produto a venda");
+                ItemPedido itemPedido = new ItemPedido();
+                itemPedido.setDataItemPedido(LocalDateTime.now());
+                itemPedido.setQuantidadeDoItem(1);
+                itemPedido.setVenda(venda);
+                itemPedido.setPrecoDoItem(p.getPreco() * itemPedido.getQuantidadeDoItem());
+                itemPedido.setProduto(p);
+
+                venda.setValorVenda(p.getPreco() * itemPedido.getQuantidadeDoItem());
+                vendaRepository.save(venda);
+
+                itemPedidoRepository.save(itemPedido);
+                // Bloco para atualizar o estoque do produto após a venda
+                var novoEstoque = produtos.estoque() - itemPedido.getQuantidadeDoItem();
+                produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), novoEstoque);
+
+                p.atualizarInformacoes(produtos);
+                produtoRepository.save(p);
+
+                return itemPedido;
+
+            }else if(p.getAtivo() == true && p.getEstoque()<=0){
+
+                throw new NoItemInSalesException("Sem item em estoque para realizar a venda");
+            }else{
+                throw new NoProdutcAtiveExcetion("Produto deve estar ativo");
+            }
         }
-
+        return null;
     }
 
     public List<ItemPedido> filtroVendaPorData(LocalDateTime inicio, LocalDateTime fim){
