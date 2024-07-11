@@ -3,10 +3,8 @@ package br.com.compassuol.Desafio._3.service;
 import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
 import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
 import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
-import br.com.compassuol.Desafio._3.exception.InvalidDateException;
-import br.com.compassuol.Desafio._3.exception.NoItemInSalesException;
-import br.com.compassuol.Desafio._3.exception.NoProdutcAtiveExcetion;
-import br.com.compassuol.Desafio._3.exception.ObjectNotFoundException;
+import br.com.compassuol.Desafio._3.exception.*;
+import br.com.compassuol.Desafio._3.exception.NullPointerException;
 import br.com.compassuol.Desafio._3.model.ItemPedido;
 import br.com.compassuol.Desafio._3.model.Produto;
 import br.com.compassuol.Desafio._3.model.Venda;
@@ -56,103 +54,133 @@ public class VendaService {
 
     @CacheEvict("buscar_venda_por_id")
     public List<ItemPedido> buscarVendaPorId(Long id){
+        try{
 
-        Optional<Venda> venda = vendaRepository.findById(id);
+            Optional<Venda> venda = vendaRepository.findById(id);
 
-        if(venda.isPresent()){
-            List<ItemPedido> itens = itemPedidoRepository.exibirItensPorVendaId(id);
-            return itens;
-        }throw  new ObjectNotFoundException("Venda não encontradas para o id: " + id);
+            if(venda.isPresent()){
+                List<ItemPedido> itens = itemPedidoRepository.exibirItensPorVendaId(id);
+                return itens;
+            }throw  new ObjectNotFoundException("Venda não encontradas para o id: " + id);
 
+        }catch (ObjectNotFoundException e){
+
+            throw new ObjectNotFoundException("Produto não encontrado");
+        }
     }
 
     @CacheEvict("criar_venda")
     public ItemPedido criarVenda(Long idProduto){
 
-        Optional<Produto>produto = produtoRepository.findById(idProduto);
-        if(produto.isPresent()) {
+        try{
+            Optional<Produto>produto = produtoRepository.findById(idProduto);
 
-            Produto p = produto.get();
+            if(produto.isPresent()) {
 
-            var produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), p.getEstoque());
+                Produto p = produto.get();
 
-            if (p.getAtivo() == true && p.getEstoque() > 0) {
+                var produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), p.getEstoque());
 
-                Venda venda = new Venda();
-                venda.setStatusVenda(StatusVenda.EFETIVADA);
-                venda.setDataCriacao(LocalDateTime.now());
+                if (p.getAtivo() == true && p.getEstoque() > 0) {
+
+                    Venda venda = new Venda();
+                    venda.setStatusVenda(StatusVenda.EFETIVADA);
+                    venda.setDataCriacao(LocalDateTime.now());
 
 
-                ItemPedido itemPedido = new ItemPedido();
-                itemPedido.setDataItemPedido(LocalDateTime.now());
-                itemPedido.setQuantidadeDoItem(1);
-                itemPedido.setVenda(venda);
-                itemPedido.setPrecoDoItem(p.getPreco() * itemPedido.getQuantidadeDoItem());
-                itemPedido.setProduto(p);
+                    ItemPedido itemPedido = new ItemPedido();
+                    itemPedido.setDataItemPedido(LocalDateTime.now());
+                    itemPedido.setQuantidadeDoItem(1);
+                    itemPedido.setVenda(venda);
+                    itemPedido.setPrecoDoItem(p.getPreco() * itemPedido.getQuantidadeDoItem());
+                    itemPedido.setProduto(p);
 
-                venda.setValorVenda(p.getPreco() * itemPedido.getQuantidadeDoItem());
-                vendaRepository.save(venda);
+                    venda.setValorVenda(p.getPreco() * itemPedido.getQuantidadeDoItem());
+                    vendaRepository.save(venda);
 
-                itemPedidoRepository.save(itemPedido);
-                // Bloco para atualizar o estoque do produto após a venda
-                var novoEstoque = produtos.estoque() - itemPedido.getQuantidadeDoItem();
-                produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), novoEstoque);
+                    itemPedidoRepository.save(itemPedido);
+                    // Bloco para atualizar o estoque do produto após a venda
+                    var novoEstoque = produtos.estoque() - itemPedido.getQuantidadeDoItem();
+                    produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), novoEstoque);
 
-                p.atualizarInformacoes(produtos);
-                produtoRepository.save(p);
+                    p.atualizarInformacoes(produtos);
+                    produtoRepository.save(p);
 
-                return itemPedido;
+                    return itemPedido;
 
-            }else if(p.getAtivo() == true && p.getEstoque()<=0){
-
-                throw new NoItemInSalesException("Sem item em estoque para realizar a venda");
-            }else{
-                throw new NoProdutcAtiveExcetion("Produto deve estar ativo");
+                }else if(p.getAtivo() == true && p.getEstoque()<=0){
+                    throw new NoItemInSalesException("Sem item em estoque para realizar a venda");
+                }else{
+                    throw new NoProdutcAtiveExcetion("Produto deve estar ativo");
+                }
             }
+            return null;
+        }catch (ObjectNotFoundException e){
+            throw new ObjectNotFoundException("Não foi possivel encontrar o Id do Produto" + idProduto);
+        }catch (NullPointerException e){
+            throw new NullPointerException("Entrada de dados inválida/nulos para gerar um nova venda");
         }
-        return null;
     }
 
     @CacheEvict("filtrar_venda_por_data")
-    public List<ItemPedido> filtroVendaPorData(LocalDateTime inicio, LocalDateTime fim){
-        
-        if(inicio.isAfter(LocalDateTime.now())){
+    public List<ItemPedido> filtroVendaPorData(LocalDateTime inicio, LocalDateTime fim) {
+        try {
+            if (inicio.isAfter(LocalDateTime.now())) {
 
-            throw new InvalidDateException("A data inicial deve estar no passado");
+                throw new InvalidDateException("A data inicial deve estar no passado");
 
-        }else if(inicio.isAfter(fim)){
+            } else if (inicio.isAfter(fim)) {
 
-            throw new InvalidDateException("A data inicial deve ser antes da data final");
+                throw new InvalidDateException("A data inicial deve ser antes da data final");
+            }
+            return itemPedidoRepository.findByDataItemPedidoBetween(inicio, fim);
+        }catch(InvalidDateException e) {
+            throw new InvalidDateException(e.getMessage());
         }
-
-        return itemPedidoRepository.findByDataItemPedidoBetween(inicio,fim);
     }
 
     @CacheEvict("gerar_relatorio_semanal")
     public List<ItemPedido> gerarRelatórioSemanal(){
-        // 1. Obter as vendas da semana atual (ou do período desejado)
-        LocalDateTime dataInicioSemana = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // Início da semana
-        LocalDateTime dataFimSemana = LocalDateTime.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).with(LocalTime.MAX); // Fim da semana
 
-        List<ItemPedido> vendaSemana = itemPedidoRepository.findByDataItemPedidoBetween(dataInicioSemana,dataFimSemana);
+        try{
+            // 1. Obter as vendas da semana atual (ou do período desejado)
+            LocalDateTime dataInicioSemana = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // Início da semana
+            LocalDateTime dataFimSemana = LocalDateTime.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).with(LocalTime.MAX); // Fim da semana
 
-        return vendaSemana;
+            List<ItemPedido> vendaSemana = itemPedidoRepository.findByDataItemPedidoBetween(dataInicioSemana,dataFimSemana);
+
+            return vendaSemana;
+        }catch (ObjectNotFoundException e){
+            throw new ObjectNotFoundException("Não foi possivel localizar as vendas");
+        }
+
     }
 
     @CacheEvict("gerar_relatorio_mensal")
     public List<ItemPedido>gerarRelatorioMensal(Integer mes, Integer ano){
 
-        // Primeiro, crie as datas de início e fim do mês desejado
-        LocalDate dataInicio = LocalDate.of(ano,mes,1);
-        LocalDate dataFim = dataInicio.withDayOfMonth(dataInicio.lengthOfMonth());
+        try{
+            // Primeiro, crie as datas de início e fim do mês desejado
+            LocalDate dataInicio = LocalDate.of(ano,mes,1);
+            LocalDate dataFim = dataInicio.withDayOfMonth(dataInicio.lengthOfMonth());
 
-        // Consulte as vendas dentro do intervalo de datas
-        LocalDateTime inicioMes = dataInicio.atStartOfDay();
-        LocalDateTime fimMes = dataFim.atTime(LocalTime.MAX);
+            // Consulte as vendas dentro do intervalo de datas
+            LocalDateTime inicioMes = dataInicio.atStartOfDay();
+            LocalDateTime fimMes = dataFim.atTime(LocalTime.MAX);
 
-        List<ItemPedido> itemPedidos = itemPedidoRepository.findByDataItemPedidoBetween(inicioMes,fimMes);
+            List<ItemPedido> itemPedidos = itemPedidoRepository.findByDataItemPedidoBetween(inicioMes,fimMes);
 
-        return itemPedidos;
+            return itemPedidos;
+
+        }catch (InvalidDateException e){
+
+            throw new InvalidDateException("Entrada de datas inválidas");
+
+        }catch (InputMismatchException e){
+
+            throw  new InputMismatchException("Informe um valor de datas válidos ");
+        }
+
     }
 
     @CacheEvict("cancelar_venda")

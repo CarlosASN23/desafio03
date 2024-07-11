@@ -3,6 +3,7 @@ package br.com.compassuol.Desafio._3.view;
 import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
 import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
 import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
+import br.com.compassuol.Desafio._3.exception.InvalidDateException;
 import br.com.compassuol.Desafio._3.exception.ObjectNotFoundException;
 import br.com.compassuol.Desafio._3.model.ItemPedido;
 import br.com.compassuol.Desafio._3.model.Produto;
@@ -220,26 +221,35 @@ public class VendaView {
     // Método para Filtrar vendas por semana
     private void filtrarVendaPorSemana() {
 
-        System.out.println("Digite a data da semana inicial (no formato yyyy-MM-dd):");
-        String semanaInicialStr = sc.nextLine();
-        var inicio = conversaoData(semanaInicialStr);
+        try{
 
-        System.out.println("Digite a data da semana final (no formato yyyy-MM-dd):");
-        String semanaFinalStr = sc.nextLine();
-        var fim = conversaoData(semanaFinalStr);
+            System.out.println("Digite a data da semana inicial (no formato yyyy-MM-dd):");
+            String semanaInicialStr = sc.nextLine();
+            var inicio = conversaoData(semanaInicialStr);
 
-        List<ItemPedido> vendasSemana = itemPedidoRepository.findByDataItemPedidoBetween(inicio, fim);
+            System.out.println("Digite a data da semana final (no formato yyyy-MM-dd):");
+            String semanaFinalStr = sc.nextLine();
+            var fim = conversaoData(semanaFinalStr);
 
-        // Exibe as vendas da semana
-        for (ItemPedido item : vendasSemana) {
-            System.out.println(item);
+            List<ItemPedido> vendasSemana = itemPedidoRepository.findByDataItemPedidoBetween(inicio, fim);
+
+            // Exibe as vendas da semana
+            for (ItemPedido item : vendasSemana) {
+                System.out.println(item);
+            }
+
+        }catch (ObjectNotFoundException e){
+            throw new ObjectNotFoundException("Não foi possivel encontrar as informações de venda");
+        }catch (InvalidDateException e){
+            throw new InvalidDateException("Entrada de data inválida");
+        }catch (br.com.compassuol.Desafio._3.exception.InputMismatchException e){
+            throw new br.com.compassuol.Desafio._3.exception.InputMismatchException("Digite um dado válido");
         }
     }
 
     // Método para converter uma String no formato de data correto
     public LocalDateTime conversaoData(String dataUsuario) {
         String dataStr = dataUsuario;
-
         // Converte a string para um objeto Date
         SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date data;
@@ -249,7 +259,6 @@ public class VendaView {
             System.err.println("Erro ao converter a data. Certifique-se de usar o formato correto.");
             return null;
         }
-
         // Converte o Date para LocalDate
         return data.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
@@ -257,25 +266,30 @@ public class VendaView {
     // Método para filtrar por mês
     private void filtrarVendaPorMes() {
 
-        System.out.println("Digite o mês (no formato yyyy-MM):");
-        String mesStr = sc.nextLine();
+        try{
+            System.out.println("Digite o mês (no formato yyyy-MM):");
+            String mesStr = sc.nextLine();
 
-        var inicioMes = conversaoData(mesStr + "-01"); // Primeiro dia do mês
-        var fimMes = conversaoData(mesStr + "-31"); // Último dia do mês
+            var inicioMes = conversaoData(mesStr + "-01"); // Primeiro dia do mês
+            var fimMes = conversaoData(mesStr + "-31"); // Último dia do mês
 
-        List<ItemPedido> vendasMes = itemPedidoRepository.findByDataItemPedidoBetween(inicioMes, fimMes);
+            List<ItemPedido> vendasMes = itemPedidoRepository.findByDataItemPedidoBetween(inicioMes, fimMes);
 
-        if(!vendasMes.isEmpty()){
-            // Exibe as vendas do mês
-            for (ItemPedido item : vendasMes) {
-                System.out.println(item);
+            if(!vendasMes.isEmpty()){
+                // Exibe as vendas do mês
+                for (ItemPedido item : vendasMes) {
+                    System.out.println(item);
+                }
+            }else{
+                YearMonth yearMonth = YearMonth.parse(mesStr, DateTimeFormatter.ofPattern("yyyy-MM"));
+                var mesAnoFormatado = yearMonth.format(DateTimeFormatter.ofPattern("MMMM/yyyy",Locale.ENGLISH));
+                System.out.println("Não houveram vends durante o mês de: " + mesAnoFormatado);
             }
-        }else{
-            YearMonth yearMonth = YearMonth.parse(mesStr, DateTimeFormatter.ofPattern("yyyy-MM"));
-            var mesAnoFormatado = yearMonth.format(DateTimeFormatter.ofPattern("MMMM/yyyy",Locale.ENGLISH));
-            System.out.println("Não houveram vends durante o mês de: " + mesAnoFormatado);
+        }catch (InvalidDateException e){
+            throw new InvalidDateException("Entrada de data inválida");
+        }catch (br.com.compassuol.Desafio._3.exception.InputMismatchException e){
+            throw new br.com.compassuol.Desafio._3.exception.InputMismatchException("Entre com um tipo de dado válido");
         }
-
     }
 
     // Método para editar uma venda
@@ -397,58 +411,66 @@ public class VendaView {
 
         }catch (ObjectNotFoundException e){
             throw new ObjectNotFoundException("Não foi possivel atualizar a venda");
+        }catch (br.com.compassuol.Desafio._3.exception.InputMismatchException e){
+            throw new br.com.compassuol.Desafio._3.exception.InputMismatchException("Entrada de dados inválida");
         }
     }
 
     // Método para cancelar a venda
     private void cancelarVenda() {
 
-        System.out.println("Entre com o id da venda:");
-        var idVenda = sc.nextLong();
+        try{
+            System.out.println("Entre com o id da venda:");
+            var idVenda = sc.nextLong();
 
-        Optional<Venda> venda = vendaRepository.findById(idVenda);
+            Optional<Venda> venda = vendaRepository.findById(idVenda);
 
-        if (venda.isPresent()) {
-            Venda v = venda.get();
-            var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+            if (venda.isPresent()) {
+                Venda v = venda.get();
+                var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
 
-            // Instanciando o itemPedido
-            List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(idVenda);
-            ItemPedido itemPedido = items.get(0);
+                // Instanciando o itemPedido
+                List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(idVenda);
+                ItemPedido itemPedido = items.get(0);
 
-            var dadosItemPedido = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
-                    itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
-                    itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
-            System.out.println(dadosItemPedido);
+                var dadosItemPedido = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
+                        itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
+                        itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
+                System.out.println(dadosItemPedido);
 
-            // Instanciando o produto
-            Optional<Produto> produto = produtoRepository.findById(itemPedido.getProduto().getIdProduto());
-            Produto p = produto.get();
-            var produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), p.getEstoque());
+                // Instanciando o produto
+                Optional<Produto> produto = produtoRepository.findById(itemPedido.getProduto().getIdProduto());
+                Produto p = produto.get();
+                var produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), p.getEstoque());
 
-            v.setValorVenda(0.0);
-            v.setStatusVenda(StatusVenda.CANCELADA);
-            DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+                v.setValorVenda(0.0);
+                v.setStatusVenda(StatusVenda.CANCELADA);
+                DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
 
-            v.atualizarInformacoes(dados);
-            vendaRepository.save(v);
+                v.atualizarInformacoes(dados);
+                vendaRepository.save(v);
 
-            // Bloco para atualizar o estoque do produto após cancelamento da venda
-            var novoEstoque = produtos.estoque() + itemPedido.getQuantidadeDoItem();
-            produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), novoEstoque);
-            p.atualizarInformacoes(produtos);
-            produtoRepository.save(p);
+                // Bloco para atualizar o estoque do produto após cancelamento da venda
+                var novoEstoque = produtos.estoque() + itemPedido.getQuantidadeDoItem();
+                produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), novoEstoque);
+                p.atualizarInformacoes(produtos);
+                produtoRepository.save(p);
 
-            // Zerar a quantidade comprada do produto e o valor
-            itemPedido.setQuantidadeDoItem(0);
-            itemPedido.setPrecoDoItem(0.0);
-            DadosItemPedidoDto dadosItem = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
-                    itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
-                    itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
+                // Zerar a quantidade comprada do produto e o valor
+                itemPedido.setQuantidadeDoItem(0);
+                itemPedido.setPrecoDoItem(0.0);
+                DadosItemPedidoDto dadosItem = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
+                        itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
+                        itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
 
-            itemPedido.atualizarInformacoes(dadosItem);
-            itemPedidoRepository.save(itemPedido);
-            System.out.println("Venda cancelada com sucesso");
+                itemPedido.atualizarInformacoes(dadosItem);
+                itemPedidoRepository.save(itemPedido);
+                System.out.println("Venda cancelada com sucesso");
+            }
+        }catch (ObjectNotFoundException e){
+            throw new ObjectNotFoundException("Não foi possivel encontrar o id da venda");
+        }catch (br.com.compassuol.Desafio._3.exception.InputMismatchException e){
+            throw new br.com.compassuol.Desafio._3.exception.InputMismatchException("Informe uma entrada de dados válida");
         }
     }
 

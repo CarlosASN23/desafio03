@@ -1,6 +1,8 @@
 package br.com.compassuol.Desafio._3.view;
 
 import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
+import br.com.compassuol.Desafio._3.exception.DuplicatedObjectException;
+import br.com.compassuol.Desafio._3.exception.InputMismatchException;
 import br.com.compassuol.Desafio._3.exception.ObjectNotFoundException;
 import br.com.compassuol.Desafio._3.model.Produto;
 import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
@@ -81,47 +83,53 @@ public class ProdutoView {
     // Método para cadastrar um novo produto
     private void cadastrarProduto(Produto produto) {
 
-        while (true) {
-            Produto prod = new Produto();
+        try {
+            while (true) {
+                Produto prod = new Produto();
 
-            System.out.println("Informe o nome do produto: ");
-            prod.setNome(sc.nextLine());
+                System.out.println("Informe o nome do produto: ");
+                prod.setNome(sc.nextLine());
 
-            if (produtoRepository.findByNomeContainingIgnoreCase(prod.getNome()).isPresent()) {
-                System.out.println("O produto já está cadastrado no banco de dados.");
-                exibirMenu();
-            } else {
-                System.out.println("Informe o valor do produto: ");
-                prod.setPreco(sc.nextDouble());
-
-                if (prod.getPreco() <= 0) {
-                    System.out.println("O preço do produto deve ser maior que zero");
+                if (produtoRepository.findByNomeContainingIgnoreCase(prod.getNome()).isPresent()) {
+                    System.out.println("O produto já está cadastrado no banco de dados.");
                     exibirMenu();
-                    continue;
+                } else {
+                    System.out.println("Informe o valor do produto: ");
+                    prod.setPreco(sc.nextDouble());
+
+                    if (prod.getPreco() <= 0) {
+                        System.out.println("O preço do produto deve ser maior que zero");
+                        exibirMenu();
+                        continue;
+                    }
+
+                    System.out.println("Informe se o produto vai estar ativo ou não (true/false): ");
+                    prod.setAtivo(sc.nextBoolean());
+
+                    System.out.println("Informe a quantidade do produto a ser alocado no estoque: ");
+                    prod.setEstoque(sc.nextInt());
+
+                    if (prod.getEstoque() < 0) {
+                        System.out.println("A quantidade a ser inserida no estoque deve ser maior que zero");
+                        exibirMenu();
+                        continue;
+                    }
+
+                    sc.nextLine(); // Descarta a quebra de linha pendente
+                    produtoRepository.save(prod);
+                    System.out.println("Produto cadastrado com sucesso: " + prod);
                 }
 
-                System.out.println("Informe se o produto vai estar ativo ou não (true/false): ");
-                prod.setAtivo(sc.nextBoolean());
-
-                System.out.println("Informe a quantidade do produto a ser alocado no estoque: ");
-                prod.setEstoque(sc.nextInt());
-
-                if (prod.getEstoque() < 0) {
-                    System.out.println("A quantidade a ser inserida no estoque deve ser maior que zero");
-                    exibirMenu();
-                    continue;
+                System.out.println("Deseja cadastrar outro produto? (S/N)");
+                String resposta = sc.nextLine();
+                if (!resposta.equalsIgnoreCase("S")) {
+                    break;
                 }
-
-                sc.nextLine(); // Descarta a quebra de linha pendente
-                produtoRepository.save(prod);
-                System.out.println("Produto cadastrado com sucesso: " + prod);
             }
-
-            System.out.println("Deseja cadastrar outro produto? (S/N)");
-            String resposta = sc.nextLine();
-            if (!resposta.equalsIgnoreCase("S")) {
-                break;
-            }
+        }catch (DuplicatedObjectException e){
+            throw  new DuplicatedObjectException("Produto já se encontra cadastrado no banco");
+        }catch (br.com.compassuol.Desafio._3.exception.InputMismatchException e){
+            throw new br.com.compassuol.Desafio._3.exception.InputMismatchException("Entrada de dados inválida");
         }
     }
 
@@ -151,7 +159,7 @@ public class ProdutoView {
             } else {
                 System.out.println("Produto não encontrado para o ID " + idProduto);
             }
-        } catch (InputMismatchException e) {
+        } catch (br.com.compassuol.Desafio._3.exception.InputMismatchException e) {
             throw new InputMismatchException("Valor informado inválido. Certifique-se de inserir um número válido.");
 
         }catch (ObjectNotFoundException e){
@@ -214,8 +222,10 @@ public class ProdutoView {
             }else {
                 System.out.println("Não foi possivel atualizar o produto ID não encontrado");
             }
-        }catch (RuntimeException e){
-            throw new ObjectNotFoundException("Não foi possivel atualizar o produto");
+        }catch (InputMismatchException e){
+            throw new InputMismatchException("Não foi possivel atualizar o produto, entrada de dados inválida");
+        }catch (ObjectNotFoundException e){
+            throw new ObjectNotFoundException("Não foi possivel encontrar o produto pelo ID");
         }
     }
 
@@ -238,8 +248,10 @@ public class ProdutoView {
             }else{
                 System.out.println("Não foi possivel inativar o produto");
             }
-        }catch (RuntimeException e){
+        }catch (ObjectNotFoundException e){
             throw new ObjectNotFoundException("Não foi possivel identificar o produto pelo ID informado");
+        }catch (InputMismatchException e){
+            throw new InputMismatchException("Entrada inválida, digite um id válido");
         }
     }
 }
