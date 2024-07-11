@@ -74,6 +74,14 @@ public class VendaController {
         return ResponseEntity.created(uri).body(itemPedido);
     }
 
+    // Método para cancelar venda
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity cancelarVenda(@PathVariable Long id){
+        vendaService.cancelarVenda(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 

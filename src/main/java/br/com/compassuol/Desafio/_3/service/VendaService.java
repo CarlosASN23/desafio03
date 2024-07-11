@@ -1,6 +1,8 @@
 package br.com.compassuol.Desafio._3.service;
 
+import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
 import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
+import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
 import br.com.compassuol.Desafio._3.exception.InvalidDateException;
 import br.com.compassuol.Desafio._3.exception.NoItemInSalesException;
 import br.com.compassuol.Desafio._3.exception.NoProdutcAtiveExcetion;
@@ -144,6 +146,57 @@ public class VendaService {
         List<ItemPedido> itemPedidos = itemPedidoRepository.findByDataItemPedidoBetween(inicioMes,fimMes);
 
         return itemPedidos;
+    }
+
+    public void cancelarVenda(Long id){
+        try{
+            Optional<Venda> venda  = vendaRepository.findById(id);
+            if(venda.isPresent()){
+                Venda v = venda.get();
+                var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+
+                // Instanciando o itemPedido
+                List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(id);
+                ItemPedido itemPedido = items.get(0);
+
+                var dadosItemPedido = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
+                        itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
+                        itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
+
+                // Instanciando o produto
+                Optional<Produto> produto = produtoRepository.findById(itemPedido.getProduto().getIdProduto());
+                Produto p = produto.get();
+                var produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), p.getEstoque());
+
+                v.setValorVenda(0.0);
+                v.setStatusVenda(StatusVenda.CANCELADA);
+                DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+
+                v.atualizarInformacoes(dados);
+                vendaRepository.save(v);
+
+                // Bloco para atualizar o estoque do produto após cancelamento da venda
+                var novoEstoque = produtos.estoque() + itemPedido.getQuantidadeDoItem();
+                produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), novoEstoque);
+                p.atualizarInformacoes(produtos);
+                produtoRepository.save(p);
+
+                // Zerar a quantidade comprada do produto e o valor
+                itemPedido.setQuantidadeDoItem(0);
+                itemPedido.setPrecoDoItem(0.0);
+                DadosItemPedidoDto dadosItem = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
+                        itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
+                        itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
+
+                itemPedido.atualizarInformacoes(dadosItem);
+                itemPedidoRepository.save(itemPedido);
+
+            }else{
+                throw new ObjectNotFoundException("Não foi possivel encontrar a venda para o ID" + id);
+            }
+        }catch (ObjectNotFoundException e){
+            throw new ObjectNotFoundException("Venda não encontrada");
+        }
     }
 
 }
