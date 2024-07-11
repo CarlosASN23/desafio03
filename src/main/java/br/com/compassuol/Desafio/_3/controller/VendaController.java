@@ -24,7 +24,7 @@ public class VendaController {
     // Método para buscar todas as vendas
     @GetMapping
     public ResponseEntity<List<ItemPedido>> buscarVendas(){
-        List<ItemPedido> items = vendaService.buscarVendas();
+        List<ItemPedido> items = vendaService.buscarVenda();
 
         if(!items.isEmpty()){
             return ResponseEntity.ok(items);

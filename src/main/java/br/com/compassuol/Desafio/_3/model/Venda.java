@@ -4,6 +4,7 @@ import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
 import br.com.compassuol.Desafio._3.model.enums.StatusVenda;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import lombok.EqualsAndHashCode;

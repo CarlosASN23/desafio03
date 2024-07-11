@@ -15,6 +15,8 @@ import br.com.compassuol.Desafio._3.repository.ItemPedidoRepository;
 import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
 import br.com.compassuol.Desafio._3.repository.VendaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -43,15 +45,16 @@ public class VendaService {
     public VendaService(ProdutoService produtoService){
         this.produtoService = produtoService;
     }
-
-    public List<ItemPedido> buscarVendas(){
-        try{
+    @CacheEvict("vendas")
+    public List<ItemPedido> buscarVenda() {
+        try {
             return itemPedidoRepository.findAll();
-        }catch (ObjectNotFoundException e){
-            throw new ObjectNotFoundException("Não foi possivel encontrar as vendas");
+        }catch (ObjectNotFoundException e) {
+            throw new ObjectNotFoundException("Produtos não encontrados");
         }
     }
 
+    @CacheEvict("buscar_venda_por_id")
     public List<ItemPedido> buscarVendaPorId(Long id){
 
         Optional<Venda> venda = vendaRepository.findById(id);
@@ -63,6 +66,7 @@ public class VendaService {
 
     }
 
+    @CacheEvict("criar_venda")
     public ItemPedido criarVenda(Long idProduto){
 
         Optional<Produto>produto = produtoRepository.findById(idProduto);
@@ -109,6 +113,7 @@ public class VendaService {
         return null;
     }
 
+    @CacheEvict("filtrar_venda_por_data")
     public List<ItemPedido> filtroVendaPorData(LocalDateTime inicio, LocalDateTime fim){
         
         if(inicio.isAfter(LocalDateTime.now())){
@@ -123,6 +128,7 @@ public class VendaService {
         return itemPedidoRepository.findByDataItemPedidoBetween(inicio,fim);
     }
 
+    @CacheEvict("gerar_relatorio_semanal")
     public List<ItemPedido> gerarRelatórioSemanal(){
         // 1. Obter as vendas da semana atual (ou do período desejado)
         LocalDateTime dataInicioSemana = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // Início da semana
@@ -133,6 +139,7 @@ public class VendaService {
         return vendaSemana;
     }
 
+    @CacheEvict("gerar_relatorio_mensal")
     public List<ItemPedido>gerarRelatorioMensal(Integer mes, Integer ano){
 
         // Primeiro, crie as datas de início e fim do mês desejado
@@ -148,6 +155,7 @@ public class VendaService {
         return itemPedidos;
     }
 
+    @CacheEvict("cancelar_venda")
     public void cancelarVenda(Long id){
         try{
             Optional<Venda> venda  = vendaRepository.findById(id);

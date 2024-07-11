@@ -6,6 +6,8 @@ import br.com.compassuol.Desafio._3.exception.ObjectNotFoundException;
 import br.com.compassuol.Desafio._3.model.Produto;
 import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +18,8 @@ public class ProdutoService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
+
+    @Cacheable("produtos")
     public List<Produto> buscarProduto() {
         try {
             return produtoRepository.findAllByAtivoTrue();
@@ -24,6 +28,7 @@ public class ProdutoService {
         }
     }
 
+    @Cacheable("produtos_por_id")
     public DadosProdutoDto buscarProdutoPorId(Long id) {
         Optional<Produto> produto = produtoRepository.findById(id);
 
@@ -33,6 +38,8 @@ public class ProdutoService {
         } throw new ObjectNotFoundException("Produto não encontrado para o ID: " + id);
 
     }
+
+    @CacheEvict("cadastro_produto")
     public Produto cadastrarProduto(Produto produto) {
 
         try {
@@ -44,6 +51,8 @@ public class ProdutoService {
 
         }
     }
+
+    @CacheEvict("atualizar_produto")
     public DadosProdutoDto atualizarProduto(DadosProdutoDto produto,Long id) {
         try {
             var prod = produtoRepository.getReferenceById(id);
@@ -53,6 +62,7 @@ public class ProdutoService {
         }
     }
 
+    @CacheEvict("inativar_produto")
     public void inativarProduto(Long id) {
         try {
             var prod = produtoRepository.getReferenceById(id);
