@@ -25,12 +25,6 @@ public class ExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(InsufiecientStockException.class)
-    public ResponseEntity<StandardError> insuficientStock(InsufiecientStockException e, HttpServletRequest request){
-        StandardError err = new StandardError(HttpStatus.BAD_REQUEST.value(), "Bad request value", e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(err);
-    }
-
     @org.springframework.web.bind.annotation.ExceptionHandler(InvalidDateException.class)
     public ResponseEntity<StandardError>InvalidDate(InvalidDateException e, HttpServletRequest request){
         StandardError err = new StandardError(HttpStatus.INTERNAL_SERVER_ERROR.value(),"Internal Server Error", e.getMessage());

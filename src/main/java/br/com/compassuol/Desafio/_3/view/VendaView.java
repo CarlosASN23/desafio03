@@ -311,7 +311,7 @@ public class VendaView {
 
                 var dadosItemPedido = new DadosItemPedidoDto(itemPedido.getIdItemPedido(),itemPedido.getVenda(),
                                                              itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
-                                                             itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
+                                                             itemPedido.getQuantidadeDoItem(),itemPedido.getDataItemPedido());
                 System.out.println(dadosItemPedido);
 
                 // Instanciando o produto

@@ -48,7 +48,7 @@ public class ItemPedido implements Serializable {
 
     @CurrentTimestamp
     @Column(name = "Data_criacao_Item",nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private LocalDateTime dataItemPedido;
 
     public ItemPedido(Venda venda,Produto produto,Double precoDoItem, Integer quantidadeDoItem) {

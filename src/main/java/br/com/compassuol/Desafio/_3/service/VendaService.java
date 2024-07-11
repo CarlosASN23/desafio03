@@ -37,13 +37,8 @@ public class VendaService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
-    private ProdutoService produtoService;
 
-    @Autowired
-    public VendaService(ProdutoService produtoService){
-        this.produtoService = produtoService;
-    }
-    @CacheEvict("vendas")
+    @CacheEvict("vendas") // @Cacheable não apresenta suporte para o tipo LocalDateTime
     public List<ItemPedido> buscarVenda() {
         try {
             return itemPedidoRepository.findAll();
@@ -52,7 +47,7 @@ public class VendaService {
         }
     }
 
-    @CacheEvict("buscar_venda_por_id")
+    @CacheEvict("buscar_venda_por_id") // @Cacheable não apresenta suporte para o tipo LocalDateTime
     public List<ItemPedido> buscarVendaPorId(Long id){
         try{
 
@@ -122,7 +117,7 @@ public class VendaService {
         }
     }
 
-    @CacheEvict("filtrar_venda_por_data")
+    @CacheEvict("filtrar_venda_por_data") // @Cacheable não apresenta suporte para o tipo LocalDateTime
     public List<ItemPedido> filtroVendaPorData(LocalDateTime inicio, LocalDateTime fim) {
         try {
             if (inicio.isAfter(LocalDateTime.now())) {
@@ -139,7 +134,7 @@ public class VendaService {
         }
     }
 
-    @CacheEvict("gerar_relatorio_semanal")
+    @CacheEvict("gerar_relatorio_semanal")// @Cacheable não apresenta suporte para o tipo LocalDateTime
     public List<ItemPedido> gerarRelatórioSemanal(){
 
         try{
@@ -156,7 +151,7 @@ public class VendaService {
 
     }
 
-    @CacheEvict("gerar_relatorio_mensal")
+    @CacheEvict("gerar_relatorio_mensal")// @Cacheable não apresenta suporte para o tipo LocalDateTime
     public List<ItemPedido>gerarRelatorioMensal(Integer mes, Integer ano){
 
         try{
@@ -235,4 +230,130 @@ public class VendaService {
         }
     }
 
+    @CacheEvict("atualizar_vendas")
+    public ItemPedido atualizarVenda(Long idVenda,Integer novoStatusVenda,Integer novaQuantidade) {
+        try {
+            Optional<Venda> venda = vendaRepository.findById(idVenda);
+            if (venda.isPresent()) {
+
+                Venda v = venda.get();
+                var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+
+                switch (novoStatusVenda){
+                    case 1:
+                        v.setStatusVenda(StatusVenda.PENDENTE);
+                        break;
+                    case 2:
+                        v.setStatusVenda(StatusVenda.EFETIVADA);
+                        break;
+                    default:
+                        throw new InputMismatchException("Digite um valor válido");
+                }
+
+                // Instanciando o itemPedido
+                List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(idVenda);
+                ItemPedido itemPedido = items.get(0);
+
+                var dadosItemPedido = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
+                        itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
+                        itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
+
+                // Instanciando o produto
+                Optional<Produto> produto = produtoRepository.findById(itemPedido.getProduto().getIdProduto());
+                Produto p = produto.get();
+                var produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), p.getEstoque());
+
+                // Verificar se há estoque suficiente para a alteração da venda
+                if(novaQuantidade>0 && novaQuantidade <= p.getEstoque()){
+
+                    // Voltar o estoque para não haver duas saidas do estoque do produto com a venda anterior
+                    var novoEstoque = produtos.estoque() + itemPedido.getQuantidadeDoItem();
+                    produtos = new DadosProdutoDto(p.getIdProduto(),p.getNome(),p.getPreco(),p.getAtivo(),novoEstoque);
+                    p.atualizarInformacoes(produtos);
+                    produtoRepository.save(p);
+
+                    var valorTotal = novaQuantidade * p.getPreco();
+
+                    // Instanciar os novos dados do itemPedido
+                    DadosItemPedidoDto item = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
+                            itemPedido.getProduto(), valorTotal, novaQuantidade,itemPedido.getDataItemPedido());
+
+                    v.setValorVenda(valorTotal);
+
+                    DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),valorTotal);
+
+                    // Atualizar o estoque do produto após atualização da venda
+                    var atualizacao = produtos.estoque() - novaQuantidade;
+                    produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), atualizacao);
+                    p.atualizarInformacoes(produtos);
+                    produtoRepository.save(p);
+
+                    DadosItemPedidoDto dadosItem = new DadosItemPedidoDto(itemPedido.getIdItemPedido(),itemPedido.getVenda(),
+                            itemPedido.getProduto(), valorTotal,
+                            novaQuantidade,itemPedido.getDataItemPedido());
+
+                    // Atualizar informações da venda e do item de pedido
+                    v.atualizarInformacoes(dados);
+                    itemPedido.atualizarInformacoes(dadosItem);
+
+                    // Salvar as alterações no banco
+                    vendaRepository.save(v);
+                    itemPedidoRepository.save(itemPedido);
+                    return itemPedido;
+
+                }else if (p.getEstoque() != 0 && p.getEstoque() < novaQuantidade){
+
+                    // Irá atribuir a quantidade maxima em estoque do produto como a quantidade a comprar
+                   var novaQuantidadeCompra =  p.getEstoque();
+
+                    // Voltar o estoque para não haver duas saidas do estoque do produto com a venda anterior
+                    var novoEstoque = produtos.estoque() + itemPedido.getQuantidadeDoItem();
+                    produtos = new DadosProdutoDto(p.getIdProduto(),p.getNome(),p.getPreco(),p.getAtivo(),novoEstoque);
+                    p.atualizarInformacoes(produtos);
+                    produtoRepository.save(p);
+
+                    // Calcular o novo valor total da compra
+                    var valorTotal = novaQuantidadeCompra * p.getPreco();
+
+                    v.setValorVenda(valorTotal);
+
+                    // Instancia os novos dados da venda
+                    DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),valorTotal);
+
+                    // Atualizar o estoque do produto após atualização da venda
+                    var atualizacao = produtos.estoque() - novaQuantidade;
+                    produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), atualizacao);
+                    p.atualizarInformacoes(produtos);
+                    produtoRepository.save(p);
+
+                    // Instanciar os novos dados do itemPedido
+                    DadosItemPedidoDto dadosItem = new DadosItemPedidoDto(itemPedido.getIdItemPedido(),itemPedido.getVenda(),
+                            itemPedido.getProduto(), valorTotal,
+                            novaQuantidade,itemPedido.getDataItemPedido());
+
+                    // Atualizar informações da venda e do item de pedido
+                    v.atualizarInformacoes(dadosVenda);
+                    itemPedido.atualizarInformacoes(dadosItem);
+
+                    // Salvar as alterações no banco
+                    vendaRepository.save(v);
+                    itemPedidoRepository.save(itemPedido);
+                    return itemPedido;
+
+                }else{
+                    throw new InputMismatchException("Não foi possivel realizar a alteração na venda");
+                }
+            }else{
+                throw new ObjectNotFoundException("Não foi possivel localizar a venda de id:" + idVenda);
+            }
+        } catch (ObjectNotFoundException e) {
+
+            throw new ObjectNotFoundException("Não foi possivel localizar a venda pelo id");
+
+        }catch (NullPointerException e){
+
+            throw new NullPointerException("Há valores nulos/inválidos sendo aplicados");
+
+        }
+    }
 }

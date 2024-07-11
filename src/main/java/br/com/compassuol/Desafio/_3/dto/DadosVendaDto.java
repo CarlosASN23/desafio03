@@ -14,7 +14,7 @@ public record DadosVendaDto(
                             Long id,
                             @NotNull
                             @CurrentTimestamp
-                            @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+                            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
                             LocalDateTime dataVenda,
                             br.com.compassuol.Desafio._3.model.enums.StatusVenda statusVenda,
                             @PositiveOrZero

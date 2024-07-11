@@ -26,6 +26,6 @@ public record DadosItemPedidoDto(
                                 @Positive
                                 Integer quantidadeItem,
                                 @CurrentTimestamp
-                                @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+                                @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
                                 LocalDateTime dataItemPedido) {
 }
