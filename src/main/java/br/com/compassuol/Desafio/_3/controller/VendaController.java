@@ -1,5 +1,8 @@
 package br.com.compassuol.Desafio._3.controller;
 
+import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
+import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
+import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
 import br.com.compassuol.Desafio._3.model.ItemPedido;
 import br.com.compassuol.Desafio._3.service.VendaService;
 import jakarta.transaction.Transactional;
@@ -80,6 +83,17 @@ public class VendaController {
     public ResponseEntity cancelarVenda(@PathVariable Long id){
         vendaService.cancelarVenda(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Método para atualizar uma venda
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity atualizarVenda(@RequestBody @Valid DadosItemPedidoDto dadosItemPedidoDto,
+                                         @RequestBody @Valid DadosVendaDto dadosVendaDto,
+                                         @PathVariable Long id){
+
+        return ResponseEntity.ok(vendaService.atualizarVenda(dadosItemPedidoDto,dadosVendaDto,dadosVendaDto.id()));
+
     }
 
 

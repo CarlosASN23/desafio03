@@ -74,11 +74,13 @@ public class VendaService {
 
             if (p.getAtivo() == true && p.getEstoque() > 0) {
 
+                // Instacianção de uma nova venda -
+                // Onde toda venda tem como padrão o status Efetivada (por não estar considerando pagamentos)
                 Venda venda = new Venda();
                 venda.setStatusVenda(StatusVenda.EFETIVADA);
                 venda.setDataCriacao(LocalDateTime.now());
 
-
+                // Instanciação de um novo item pedido a ser alocado a venda
                 ItemPedido itemPedido = new ItemPedido();
                 itemPedido.setDataItemPedido(LocalDateTime.now());
                 itemPedido.setQuantidadeDoItem(1);
@@ -86,6 +88,7 @@ public class VendaService {
                 itemPedido.setPrecoDoItem(p.getPreco() * itemPedido.getQuantidadeDoItem());
                 itemPedido.setProduto(p);
 
+                // Atribuindo o valor todal da venda
                 venda.setValorVenda(p.getPreco() * itemPedido.getQuantidadeDoItem());
                 vendaRepository.save(venda);
 
@@ -94,6 +97,7 @@ public class VendaService {
                 var novoEstoque = produtos.estoque() - itemPedido.getQuantidadeDoItem();
                 produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), novoEstoque);
 
+                // Salvando atualizações do estoque do produto
                 p.atualizarInformacoes(produtos);
                 produtoRepository.save(p);
 
@@ -196,6 +200,30 @@ public class VendaService {
             }
         }catch (ObjectNotFoundException e){
             throw new ObjectNotFoundException("Venda não encontrada");
+        }
+    }
+
+    public DadosItemPedidoDto atualizarVenda(DadosItemPedidoDto dadosItemPedidoDto,
+                                             DadosVendaDto dadosVendaDto ,Long id){
+
+        try{
+            var venda = vendaRepository.findById(id);
+
+            if(venda.isPresent()){
+
+                Venda v = venda.get();
+
+                var itemPedido = itemPedidoRepository.findById(venda.get().getIdVenda());
+                ItemPedido item = itemPedido.get();
+
+                v.atualizarInformacoes(dadosVendaDto);
+                return itemPedido.orElseThrow().atualizarInformacoes(dadosItemPedidoDto);
+
+            }else{
+                throw new ObjectNotFoundException("Não foi possivel encontrar a venda para o ID" + id);
+            }
+        }catch (ObjectNotFoundException e){
+            throw new ObjectNotFoundException("Não foi possivel localizar a venda");
         }
     }
 
