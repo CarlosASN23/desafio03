@@ -8,6 +8,7 @@ import br.com.compassuol.Desafio._3.model.Produto;
 import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,9 @@ public class ProdutoService {
 
             if (produto.isPresent()) {
                 Produto p = produto.get();
-                return new DadosProdutoDto(p.getIdProduto(),p.getNome(), p.getPreco(),p.getAtivo(),p.getEstoque());
+                var produtos = new DadosProdutoDto(p.getIdProduto(),p.getNome(),p.getPreco(),p.getAtivo(),p.getEstoque());
+                return produtos;
+
             } throw new ObjectNotFoundException("Produto não encontrado para o ID: " + id);
 
         }catch (ObjectNotFoundException e){

@@ -71,33 +71,6 @@ public class ItemPedido implements Serializable {
                 ", Data do Pedido do item = " + dataItemPedido;
     }
 
-    public void atualizarEstoque (List< ItemPedido > itensPedido, Map< Long, Produto > estoque){
-        for (ItemPedido item : itensPedido) {
-            long idProduto = item.getProduto().getIdProduto();
-            int quantidadeVendida = item.getProduto().getEstoque();
-
-            if (estoque.containsKey(idProduto)) {
-                Produto produto = estoque.get(idProduto);
-                int quantidadeAtual = produto.getEstoque();
-                if (quantidadeAtual >= quantidadeVendida) {
-                    produto.setEstoque(quantidadeAtual - quantidadeVendida);
-                    System.out.println("Estoque atualizado para o produto " + produto.getNome());
-                } else {
-                    System.out.println("Quantidade insuficiente em estoque para o produto " + produto.getNome());
-                }
-            }
-        }
-    }
-
-    public double calcularPrecoTotal(List<ItemPedido> itensPedido) {
-        double precoTotal = 0.0;
-        for (ItemPedido item : itensPedido) {
-            double precoItem = item.getProduto().getPreco() * item.quantidadeDoItem;
-            precoTotal += precoItem;
-        }
-        return precoTotal;
-    }
-
     public DadosItemPedidoDto atualizarInformacoes(DadosItemPedidoDto dadosItem) {
         if(dadosItem.precoItem() != null){
             this.precoDoItem = dadosItem.precoItem();

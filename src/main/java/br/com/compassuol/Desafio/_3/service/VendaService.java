@@ -12,6 +12,7 @@ import br.com.compassuol.Desafio._3.model.enums.StatusVenda;
 import br.com.compassuol.Desafio._3.repository.ItemPedidoRepository;
 import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
 import br.com.compassuol.Desafio._3.repository.VendaRepository;
+import org.hibernate.annotations.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,7 +39,7 @@ public class VendaService {
     private ProdutoRepository produtoRepository;
 
 
-    @CacheEvict("vendas") // @Cacheable não apresenta suporte para o tipo LocalDateTime
+    @Cacheable("vendas") // @Cacheable não apresenta suporte para o tipo LocalDateTime
     public List<ItemPedido> buscarVenda() {
         try {
             return itemPedidoRepository.findAll();
@@ -47,7 +48,7 @@ public class VendaService {
         }
     }
 
-    @CacheEvict("buscar_venda_por_id") // @Cacheable não apresenta suporte para o tipo LocalDateTime
+    @Cacheable("buscar_venda_por_id")
     public List<ItemPedido> buscarVendaPorId(Long id){
         try{
 
@@ -117,7 +118,7 @@ public class VendaService {
         }
     }
 
-    @CacheEvict("filtrar_venda_por_data") // @Cacheable não apresenta suporte para o tipo LocalDateTime
+    @Cacheable("filtrar_venda_por_data")
     public List<ItemPedido> filtroVendaPorData(LocalDateTime inicio, LocalDateTime fim) {
         try {
             if (inicio.isAfter(LocalDateTime.now())) {
@@ -134,7 +135,7 @@ public class VendaService {
         }
     }
 
-    @CacheEvict("gerar_relatorio_semanal")// @Cacheable não apresenta suporte para o tipo LocalDateTime
+    @Cacheable("gerar_relatorio_semanal")
     public List<ItemPedido> gerarRelatórioSemanal(){
 
         try{
@@ -151,7 +152,7 @@ public class VendaService {
 
     }
 
-    @CacheEvict("gerar_relatorio_mensal")// @Cacheable não apresenta suporte para o tipo LocalDateTime
+    @Cacheable("gerar_relatorio_mensal")
     public List<ItemPedido>gerarRelatorioMensal(Integer mes, Integer ano){
 
         try{
