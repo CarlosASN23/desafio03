@@ -4,6 +4,7 @@ import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
 import br.com.compassuol.Desafio._3.model.enums.StatusVenda;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
@@ -24,7 +25,7 @@ import java.util.*;
 @Table(name = "vendas")
 public class Venda implements Serializable {
 
-    private static final long serialVersion = 1L;
+    private static final long serialVersion = 5208461268308404994L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

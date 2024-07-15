@@ -6,10 +6,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.annotations.CurrentTimestamp;
 
-import java.time.LocalDate;
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.Date;
 
 public record VendaDto(
                         @NotNull
@@ -21,5 +19,6 @@ public record VendaDto(
                         Integer statusVenda,
                         @NotNull
                         @PositiveOrZero
-                        Double valorVenda) {
+                        Double valorVenda) implements Serializable {
+    private static final long serialVersion = 1L;
 }

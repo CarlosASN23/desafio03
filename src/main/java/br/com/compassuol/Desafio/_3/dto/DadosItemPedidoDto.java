@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.annotations.CurrentTimestamp;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -27,5 +28,7 @@ public record DadosItemPedidoDto(
                                 Integer quantidadeItem,
                                 @CurrentTimestamp
                                 @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-                                LocalDateTime dataItemPedido) {
+                                LocalDateTime dataItemPedido) implements Serializable {
+
+    private static final long serialVersion = 1L;
 }

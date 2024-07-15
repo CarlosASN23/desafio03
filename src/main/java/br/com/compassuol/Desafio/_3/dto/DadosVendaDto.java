@@ -5,9 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.annotations.CurrentTimestamp;
 
-import java.time.LocalDate;
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 public record DadosVendaDto(
                             @NotNull
@@ -18,5 +17,7 @@ public record DadosVendaDto(
                             LocalDateTime dataVenda,
                             br.com.compassuol.Desafio._3.model.enums.StatusVenda statusVenda,
                             @PositiveOrZero
-                            Double valorVenda) {
+                            Double valorVenda) implements Serializable {
+
+    private static final long serialVersion = 1L;
 }
