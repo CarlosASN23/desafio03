@@ -49,4 +49,10 @@ public class ExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(err);
     }
 
+    @org.springframework.web.bind.annotation.ExceptionHandler(JWTCreationException.class)
+    public ResponseEntity<StandardError> JWTCreationException(JWTCreationException e, HttpServletRequest request){
+        StandardError err = new StandardError(HttpStatus.INTERNAL_SERVER_ERROR.value(),"Internal Server Error", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(err);
+    }
+
 }
