@@ -1,5 +1,6 @@
 package br.com.compassuol.Desafio._3.dto;
 
+import br.com.compassuol.Desafio._3.model.Usuario;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -17,7 +18,7 @@ public record DadosVendaDto(
                             LocalDateTime dataVenda,
                             br.com.compassuol.Desafio._3.model.enums.StatusVenda statusVenda,
                             @PositiveOrZero
-                            Double valorVenda) implements Serializable {
-
-    private static final long serialVersion = 1L;
+                            Double valorVenda,
+                            @NotNull
+                            Long idUsuario) {
 }

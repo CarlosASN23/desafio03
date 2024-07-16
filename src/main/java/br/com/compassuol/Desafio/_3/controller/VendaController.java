@@ -1,6 +1,5 @@
 package br.com.compassuol.Desafio._3.controller;
 
-import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
 import br.com.compassuol.Desafio._3.model.ItemPedido;
 import br.com.compassuol.Desafio._3.service.VendaService;
 import jakarta.transaction.Transactional;
@@ -8,11 +7,9 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -70,8 +67,11 @@ public class VendaController {
     //Método para criar uma nova venda
     @PostMapping
     @Transactional
-    public ResponseEntity<ItemPedido> criarNovaVenda(@RequestParam @Valid Long idProduto, UriComponentsBuilder uriBuilder){
-        ItemPedido itemPedido = vendaService.criarVenda(idProduto);
+    public ResponseEntity<ItemPedido> criarNovaVenda(@RequestParam @Valid Long idProduto,
+                                                     @RequestParam @Valid Long idUsuario,
+                                                     UriComponentsBuilder uriBuilder){
+
+        ItemPedido itemPedido = vendaService.criarVenda(idProduto,idUsuario);
         var uri = uriBuilder.path("/venda/{id}").buildAndExpand(itemPedido.getVenda().getIdVenda()).toUri();
         return ResponseEntity.created(uri).body(itemPedido);
     }

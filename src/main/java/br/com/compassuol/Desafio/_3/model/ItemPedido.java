@@ -2,7 +2,6 @@ package br.com.compassuol.Desafio._3.model;
 
 import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,10 +10,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CurrentTimestamp;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 @Entity
 @Getter
@@ -64,6 +60,7 @@ public class ItemPedido implements Serializable {
         return "ItemPedido{ id: " + idItemPedido + "{Venda id: " +
                 venda.getIdVenda() + ",Data " + venda.getDataCriacao() +
                 ", Status Venda " + venda.getStatusVenda()+
+                ", Id usuario: " + venda.getUsuario().getId() +
                 ", || Nome do produto = " + produto.getNome() +
                 ", Preço Unitário = R$" + produto.getPreco() +
                 ", || Preco total Compra = R$" + precoDoItem +

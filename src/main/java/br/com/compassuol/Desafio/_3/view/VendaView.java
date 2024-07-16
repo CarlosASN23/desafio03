@@ -303,7 +303,7 @@ public class VendaView {
 
             if(venda.isPresent()) {
                 Venda v = venda.get();
-                var dadosVenda = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),v.getValorVenda());
+                var dadosVenda = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),v.getValorVenda(),v.getUsuario().getId());
 
                 // Instanciando o itemPedido
                 List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(idVenda);
@@ -340,7 +340,7 @@ public class VendaView {
 
                     v.setValorVenda(0.0);
                     v.setStatusVenda(StatusVenda.CANCELADA);
-                    DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),v.getValorVenda());
+                    DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),v.getValorVenda(),v.getUsuario().getId());
 
                     v.atualizarInformacoes(dados);
                     vendaRepository.save(v);
@@ -380,7 +380,7 @@ public class VendaView {
 
                         var valorTotal = itemPedido.getProduto().getPreco() * quantidadeVenda;
 
-                        DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), valorTotal);
+                        DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), valorTotal,v.getUsuario().getId());
 
                         DadosItemPedidoDto dadosItemPedidoDto = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
                                 itemPedido.getProduto(), valorTotal,
@@ -427,7 +427,7 @@ public class VendaView {
 
             if (venda.isPresent()) {
                 Venda v = venda.get();
-                var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+                var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda(),v.getUsuario().getId());
 
                 // Instanciando o itemPedido
                 List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(idVenda);
@@ -445,7 +445,7 @@ public class VendaView {
 
                 v.setValorVenda(0.0);
                 v.setStatusVenda(StatusVenda.CANCELADA);
-                DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+                DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda(),v.getUsuario().getId());
 
                 v.atualizarInformacoes(dados);
                 vendaRepository.save(v);

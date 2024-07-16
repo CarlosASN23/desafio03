@@ -19,6 +19,6 @@ public record VendaDto(
                         Integer statusVenda,
                         @NotNull
                         @PositiveOrZero
-                        Double valorVenda) implements Serializable {
-    private static final long serialVersion = 1L;
+                        Double valorVenda){
+
 }

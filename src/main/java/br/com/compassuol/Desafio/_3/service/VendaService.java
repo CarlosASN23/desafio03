@@ -3,16 +3,17 @@ package br.com.compassuol.Desafio._3.service;
 import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
 import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
 import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
-import br.com.compassuol.Desafio._3.exception.*;
 import br.com.compassuol.Desafio._3.exception.NullPointerException;
+import br.com.compassuol.Desafio._3.exception.*;
 import br.com.compassuol.Desafio._3.model.ItemPedido;
 import br.com.compassuol.Desafio._3.model.Produto;
+import br.com.compassuol.Desafio._3.model.Usuario;
 import br.com.compassuol.Desafio._3.model.Venda;
 import br.com.compassuol.Desafio._3.model.enums.StatusVenda;
 import br.com.compassuol.Desafio._3.repository.ItemPedidoRepository;
 import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
+import br.com.compassuol.Desafio._3.repository.UsuarioRepository;
 import br.com.compassuol.Desafio._3.repository.VendaRepository;
-import org.hibernate.annotations.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,6 +39,9 @@ public class VendaService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
 
     @Cacheable("vendas") // @Cacheable não apresenta suporte para o tipo LocalDateTime
     public List<ItemPedido> buscarVenda() {
@@ -55,8 +59,7 @@ public class VendaService {
             Optional<Venda> venda = vendaRepository.findById(id);
 
             if(venda.isPresent()){
-                List<ItemPedido> itens = itemPedidoRepository.exibirItensPorVendaId(id);
-                return itens;
+                return itemPedidoRepository.exibirItensPorVendaId(id);
             }throw  new ObjectNotFoundException("Venda não encontradas para o id: " + id);
 
         }catch (ObjectNotFoundException e){
@@ -66,23 +69,26 @@ public class VendaService {
     }
 
     @CacheEvict("criar_venda")
-    public ItemPedido criarVenda(Long idProduto){
+    public ItemPedido criarVenda(Long idProduto, Long idUsuario){
 
         try{
             Optional<Produto>produto = produtoRepository.findById(idProduto);
+            Optional<Usuario> usuario = usuarioRepository.findById(idUsuario);
 
-            if(produto.isPresent()) {
+            if(produto.isPresent() && usuario.isPresent()) {
 
                 Produto p = produto.get();
-
                 var produtos = new DadosProdutoDto(p.getIdProduto(), p.getNome(), p.getPreco(), p.getAtivo(), p.getEstoque());
 
-                if (p.getAtivo() == true && p.getEstoque() > 0) {
+                Usuario u = usuario.get();
+                var usuarioDados = new Usuario(u.getId(),u.getEmail(),u.getUserRoles());
+
+                if (p.getAtivo() && p.getEstoque() > 0) {
 
                     Venda venda = new Venda();
-                    venda.setStatusVenda(StatusVenda.EFETIVADA);
+                    venda.setStatusVenda(StatusVenda.PENDENTE);
                     venda.setDataCriacao(LocalDateTime.now());
-
+                    venda.setUsuario(usuarioDados);
 
                     ItemPedido itemPedido = new ItemPedido();
                     itemPedido.setDataItemPedido(LocalDateTime.now());
@@ -104,7 +110,7 @@ public class VendaService {
 
                     return itemPedido;
 
-                }else if(p.getAtivo() == true && p.getEstoque()<=0){
+                }else if(p.getAtivo()){
                     throw new NoItemInSalesException("Sem item em estoque para realizar a venda");
                 }else{
                     throw new NoProdutcAtiveExcetion("Produto deve estar ativo");
@@ -137,15 +143,12 @@ public class VendaService {
 
     @Cacheable("gerar_relatorio_semanal")
     public List<ItemPedido> gerarRelatórioSemanal(){
-
         try{
             // 1. Obter as vendas da semana atual (ou do período desejado)
             LocalDateTime dataInicioSemana = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // Início da semana
             LocalDateTime dataFimSemana = LocalDateTime.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).with(LocalTime.MAX); // Fim da semana
 
-            List<ItemPedido> vendaSemana = itemPedidoRepository.findByDataItemPedidoBetween(dataInicioSemana,dataFimSemana);
-
-            return vendaSemana;
+            return itemPedidoRepository.findByDataItemPedidoBetween(dataInicioSemana,dataFimSemana);
         }catch (ObjectNotFoundException e){
             throw new ObjectNotFoundException("Não foi possivel localizar as vendas");
         }
@@ -164,9 +167,7 @@ public class VendaService {
             LocalDateTime inicioMes = dataInicio.atStartOfDay();
             LocalDateTime fimMes = dataFim.atTime(LocalTime.MAX);
 
-            List<ItemPedido> itemPedidos = itemPedidoRepository.findByDataItemPedidoBetween(inicioMes,fimMes);
-
-            return itemPedidos;
+            return itemPedidoRepository.findByDataItemPedidoBetween(inicioMes,fimMes);
 
         }catch (InvalidDateException e){
 
@@ -183,17 +184,19 @@ public class VendaService {
     public void cancelarVenda(Long id){
         try{
             Optional<Venda> venda  = vendaRepository.findById(id);
-            if(venda.isPresent()){
+
+            // Instanciando Usuario
+            Optional<Usuario> usuario = usuarioRepository.findById(venda.get().getUsuario().getId());
+
+            if(usuario.isPresent()){
+
+                Usuario u = usuario.get();
+
                 Venda v = venda.get();
-                var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
 
                 // Instanciando o itemPedido
                 List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(id);
                 ItemPedido itemPedido = items.get(0);
-
-                var dadosItemPedido = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
-                        itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
-                        itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
 
                 // Instanciando o produto
                 Optional<Produto> produto = produtoRepository.findById(itemPedido.getProduto().getIdProduto());
@@ -202,7 +205,7 @@ public class VendaService {
 
                 v.setValorVenda(0.0);
                 v.setStatusVenda(StatusVenda.CANCELADA);
-                DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+                DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda(),u.getId());
 
                 v.atualizarInformacoes(dados);
                 vendaRepository.save(v);
@@ -237,8 +240,12 @@ public class VendaService {
             Optional<Venda> venda = vendaRepository.findById(idVenda);
             if (venda.isPresent()) {
 
+                // Instanciando Usuario
+                Optional<Usuario> usuario = usuarioRepository.findById(venda.get().getUsuario().getId());
+                Usuario u = usuario.get();
+
                 Venda v = venda.get();
-                var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda());
+                var dadosVenda = new DadosVendaDto(v.getIdVenda(), v.getDataCriacao(), v.getStatusVenda(), v.getValorVenda(),u.getId());
 
                 switch (novoStatusVenda){
                     case 1:
@@ -254,10 +261,6 @@ public class VendaService {
                 // Instanciando o itemPedido
                 List<ItemPedido> items = itemPedidoRepository.exibirItensPorVendaId(idVenda);
                 ItemPedido itemPedido = items.get(0);
-
-                var dadosItemPedido = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
-                        itemPedido.getProduto(), itemPedido.getPrecoDoItem(),
-                        itemPedido.getQuantidadeDoItem(), itemPedido.getDataItemPedido());
 
                 // Instanciando o produto
                 Optional<Produto> produto = produtoRepository.findById(itemPedido.getProduto().getIdProduto());
@@ -275,13 +278,9 @@ public class VendaService {
 
                     var valorTotal = novaQuantidade * p.getPreco();
 
-                    // Instanciar os novos dados do itemPedido
-                    DadosItemPedidoDto item = new DadosItemPedidoDto(itemPedido.getIdItemPedido(), itemPedido.getVenda(),
-                            itemPedido.getProduto(), valorTotal, novaQuantidade,itemPedido.getDataItemPedido());
-
                     v.setValorVenda(valorTotal);
 
-                    DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),valorTotal);
+                    DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),valorTotal,u.getId());
 
                     // Atualizar o estoque do produto após atualização da venda
                     var atualizacao = produtos.estoque() - novaQuantidade;
@@ -317,9 +316,6 @@ public class VendaService {
                     var valorTotal = novaQuantidadeCompra * p.getPreco();
 
                     v.setValorVenda(valorTotal);
-
-                    // Instancia os novos dados da venda
-                    DadosVendaDto dados = new DadosVendaDto(v.getIdVenda(),v.getDataCriacao(),v.getStatusVenda(),valorTotal);
 
                     // Atualizar o estoque do produto após atualização da venda
                     var atualizacao = produtos.estoque() - novaQuantidade;

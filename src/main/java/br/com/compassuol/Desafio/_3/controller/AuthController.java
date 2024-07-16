@@ -53,4 +53,5 @@ public class AuthController {
         this.usuarioRepository.save(usuario);
         return ResponseEntity.ok("Usuário registrado com sucesso!");
     }
+
 }

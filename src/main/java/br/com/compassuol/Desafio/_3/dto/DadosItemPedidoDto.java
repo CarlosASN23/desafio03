@@ -28,7 +28,6 @@ public record DadosItemPedidoDto(
                                 Integer quantidadeItem,
                                 @CurrentTimestamp
                                 @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-                                LocalDateTime dataItemPedido) implements Serializable {
+                                LocalDateTime dataItemPedido) {
 
-    private static final long serialVersion = 1L;
 }
