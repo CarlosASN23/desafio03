@@ -1,6 +1,6 @@
 package br.com.compassuol.Desafio._3.model;
 
-import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
+import br.com.compassuol.Desafio._3.dto.venda.DadosVendaDto;
 import br.com.compassuol.Desafio._3.model.enums.StatusVenda;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;

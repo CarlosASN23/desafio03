@@ -1,6 +1,6 @@
 package br.com.compassuol.Desafio._3.model;
 
-import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
+import br.com.compassuol.Desafio._3.dto.itemPedido.DadosItemPedidoDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;

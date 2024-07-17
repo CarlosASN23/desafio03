@@ -1,8 +1,8 @@
 package br.com.compassuol.Desafio._3.service;
 
-import br.com.compassuol.Desafio._3.dto.DadosItemPedidoDto;
-import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
-import br.com.compassuol.Desafio._3.dto.DadosVendaDto;
+import br.com.compassuol.Desafio._3.dto.itemPedido.DadosItemPedidoDto;
+import br.com.compassuol.Desafio._3.dto.produto.DadosProdutoDto;
+import br.com.compassuol.Desafio._3.dto.venda.DadosVendaDto;
 import br.com.compassuol.Desafio._3.exception.NullPointerException;
 import br.com.compassuol.Desafio._3.exception.*;
 import br.com.compassuol.Desafio._3.model.ItemPedido;

@@ -1,6 +1,6 @@
 package br.com.compassuol.Desafio._3.view;
 
-import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
+import br.com.compassuol.Desafio._3.dto.produto.DadosProdutoDto;
 import br.com.compassuol.Desafio._3.exception.DuplicatedObjectException;
 import br.com.compassuol.Desafio._3.exception.InputMismatchException;
 import br.com.compassuol.Desafio._3.exception.ObjectNotFoundException;

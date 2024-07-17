@@ -1,4 +1,4 @@
-package br.com.compassuol.Desafio._3.dto;
+package br.com.compassuol.Desafio._3.dto.produto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

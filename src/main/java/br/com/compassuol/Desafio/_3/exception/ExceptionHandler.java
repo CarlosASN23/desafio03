@@ -49,4 +49,17 @@ public class ExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(err);
     }
 
+    @org.springframework.web.bind.annotation.ExceptionHandler(MailSendException.class)
+    public ResponseEntity<StandardError> MailSendException(MailSendException e, HttpServletRequest request){
+        StandardError err = new StandardError(HttpStatus.BAD_REQUEST.value(),"Internal Server Error", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(err);
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<StandardError> UsernameNotFoundException(UsernameNotFoundException e, HttpServletRequest request){
+        StandardError err = new StandardError(HttpStatus.BAD_REQUEST.value(),"Internal Server Error", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(err);
+    }
+
+
 }

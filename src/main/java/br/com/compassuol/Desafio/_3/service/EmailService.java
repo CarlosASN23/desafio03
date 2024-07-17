@@ -1,5 +1,6 @@
 package br.com.compassuol.Desafio._3.service;
 
+import br.com.compassuol.Desafio._3.exception.UsernameNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSendException;
@@ -30,8 +31,10 @@ public class EmailService {
             javaMailSender.send(simpleMailMessage);
 
             return "Email enviado com sucesso";
-        }catch (MailSendException e){
-            throw new MailSendException("Erro ao tentar enviar o email "+e.getLocalizedMessage());
+        }catch (br.com.compassuol.Desafio._3.exception.MailSendException e){
+            throw new MailSendException("Erro ao tentar enviar o email " + e.getLocalizedMessage());
+        }catch (UsernameNotFoundException e){
+            throw new UsernameNotFoundException("Não foi possivel encontrar o email " + destinatario);
         }
     }
 }

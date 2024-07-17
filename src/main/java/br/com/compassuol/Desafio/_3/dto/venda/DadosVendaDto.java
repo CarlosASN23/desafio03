@@ -1,4 +1,4 @@
-package br.com.compassuol.Desafio._3.dto;
+package br.com.compassuol.Desafio._3.dto.venda;
 
 import br.com.compassuol.Desafio._3.model.Usuario;
 import com.fasterxml.jackson.annotation.JsonFormat;

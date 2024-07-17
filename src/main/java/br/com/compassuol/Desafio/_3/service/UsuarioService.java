@@ -1,10 +1,8 @@
 package br.com.compassuol.Desafio._3.service;
 
-import br.com.compassuol.Desafio._3.dto.PasswordTokenPublicData;
+import br.com.compassuol.Desafio._3.dto.usuario.PasswordTokenPublicData;
 import br.com.compassuol.Desafio._3.model.Usuario;
 import br.com.compassuol.Desafio._3.repository.UsuarioRepository;
-import br.com.compassuol.Desafio._3.security.SecurityConfig;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.token.KeyBasedPersistenceTokenService;
 import org.springframework.security.core.token.SecureRandomFactoryBean;

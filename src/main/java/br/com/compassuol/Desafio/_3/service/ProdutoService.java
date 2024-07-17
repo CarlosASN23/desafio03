@@ -1,6 +1,6 @@
 package br.com.compassuol.Desafio._3.service;
 
-import br.com.compassuol.Desafio._3.dto.DadosProdutoDto;
+import br.com.compassuol.Desafio._3.dto.produto.DadosProdutoDto;
 import br.com.compassuol.Desafio._3.exception.DuplicatedObjectException;
 import br.com.compassuol.Desafio._3.exception.InputMismatchException;
 import br.com.compassuol.Desafio._3.exception.ObjectNotFoundException;
@@ -8,7 +8,6 @@ import br.com.compassuol.Desafio._3.model.Produto;
 import br.com.compassuol.Desafio._3.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 

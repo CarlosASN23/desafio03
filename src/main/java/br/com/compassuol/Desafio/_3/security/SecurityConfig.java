@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login/registrar").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login/esquecer-senha").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login/mudar-senha").permitAll()
                         .requestMatchers(HttpMethod.POST, "/produto").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/produto/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/produto/{id}").hasRole("ADMIN")

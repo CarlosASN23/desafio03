@@ -1,4 +1,4 @@
-package br.com.compassuol.Desafio._3.dto;
+package br.com.compassuol.Desafio._3.dto.venda;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;

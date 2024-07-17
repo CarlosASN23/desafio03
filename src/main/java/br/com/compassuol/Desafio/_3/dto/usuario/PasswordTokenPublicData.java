@@ -1,4 +1,4 @@
-package br.com.compassuol.Desafio._3.dto;
+package br.com.compassuol.Desafio._3.dto.usuario;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
