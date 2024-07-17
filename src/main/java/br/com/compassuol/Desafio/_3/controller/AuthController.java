@@ -6,6 +6,7 @@ import br.com.compassuol.Desafio._3.dto.UsuarioDto;
 import br.com.compassuol.Desafio._3.model.Usuario;
 import br.com.compassuol.Desafio._3.repository.UsuarioRepository;
 import br.com.compassuol.Desafio._3.security.TokenService;
+import br.com.compassuol.Desafio._3.service.UsuarioService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class AuthController {
         var token = tokenService.generateToken((Usuario) auth.getPrincipal());
 
         return ResponseEntity.ok(new LoginResponseDto(token));
+
     }
 
     @PostMapping("/registrar")
