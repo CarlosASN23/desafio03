@@ -1,4 +1,6 @@
 package br.com.compassuol.Desafio._3.dto;
 
-public record UsuarioDto(String email, String senha) {
+import jakarta.validation.constraints.Email;
+
+public record UsuarioDto(@Email String email, String senha) {
 }

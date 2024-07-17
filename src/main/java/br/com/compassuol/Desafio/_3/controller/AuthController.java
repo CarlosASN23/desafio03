@@ -1,23 +1,26 @@
 package br.com.compassuol.Desafio._3.controller;
 
-import br.com.compassuol.Desafio._3.dto.LoginResponseDto;
-import br.com.compassuol.Desafio._3.dto.RegistroUserDto;
-import br.com.compassuol.Desafio._3.dto.UsuarioDto;
+import br.com.compassuol.Desafio._3.dto.*;
 import br.com.compassuol.Desafio._3.model.Usuario;
 import br.com.compassuol.Desafio._3.repository.UsuarioRepository;
 import br.com.compassuol.Desafio._3.security.TokenService;
+import br.com.compassuol.Desafio._3.service.EmailService;
 import br.com.compassuol.Desafio._3.service.UsuarioService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/login")
@@ -29,7 +32,13 @@ public class AuthController {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private EmailService emailService;
 
     @PostMapping
     public ResponseEntity login(@RequestBody @Valid UsuarioDto usuario){
@@ -54,6 +63,20 @@ public class AuthController {
 
         this.usuarioRepository.save(usuario);
         return ResponseEntity.ok("Usuário registrado com sucesso!");
+    }
+
+    @PostMapping("/esquecer-senha")
+    public void esquecerSenha (@RequestBody @Valid DadosRecuperacaoSenha dados) throws Exception {
+        UserDetails usuario = usuarioRepository.findByEmail(dados.email());
+
+        if(!usuario.getUsername().isEmpty()){
+            UserDetails user = usuario;
+            String token = usuarioService.generateToken((Usuario) user);
+
+            String assunto = "Redefinição de senha";
+            String text = "Seu token para redefinição de senha é: " + token;
+            emailService.enviarEmailTexto(((Usuario) user).getEmail(),assunto, text);
+        }
     }
 
 }
