@@ -118,7 +118,7 @@ public class VendaService {
             }
             return null;
         }catch (ObjectNotFoundException e){
-            throw new ObjectNotFoundException("Não foi possivel encontrar o Id do Produto" + idProduto);
+            throw new ObjectNotFoundException("Não foi possivel encontrar o Id da Venda" + idProduto);
         }catch (NullPointerException e){
             throw new NullPointerException("Entrada de dados inválida/nulos para gerar um nova venda");
         }
